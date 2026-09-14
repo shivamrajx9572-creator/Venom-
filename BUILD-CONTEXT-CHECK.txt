@@ -1,0 +1,7 @@
+SHIVAM BOT BUILDER v3.2.5 - Render Build Context
+
+IMPORTANT:
+1. The repository root must contain Dockerfile, server.js, bot_template.py, package.json, requirements.txt and public/index.html.
+2. This release also includes a root-level index.html fallback so the Docker build can restore public/index.html if a deployment tool flattens the public directory.
+3. Deploy the repository root, not a parent folder containing the project.
+4. In Render, use Docker runtime and keep the persistent disk at /var/data.

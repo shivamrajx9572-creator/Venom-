@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: shivam-bot-builder
+    runtime: docker
+    healthCheckPath: /api/health
+    envVars:
+      # ─── Core Config (Auto-Set) ────────────────────────────────────────
+      - key: NODE_ENV
+        value: production
+      - key: BUILDER_REQUIRE_AUTH
+        value: "1"
+      - key: DATA_DIR
+        value: /app/data
+      - key: PORT
+        value: "3000"
+
+      # ─── Secrets (Set in Render Dashboard manually) ────────────────────
+      - key: BUILDER_SECRET
+        sync: false
+      - key: BUILDER_ADMIN_KEY
+        sync: false
+      - key: PUBLIC_BASE_URL
+        sync: false
+
+      # ─── Optional: SMTP (Password Reset – Can be left blank) ───────────
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "465"
+      - key: SMTP_SECURE
+        value: "1"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false

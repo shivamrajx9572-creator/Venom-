@@ -1,0 +1,2027 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05040a">
+<title>SHIVAM BOT BUILDER • NEXUS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#05040a; --surface:rgba(16,14,32,.72); --glass:rgba(22,18,44,.55);
+  --glass-2:rgba(30,24,58,.78);
+  --border-soft:rgba(160,120,255,.14); --border-hard:rgba(160,120,255,.38);
+  --aurora-teal:#2ff5c8; --aurora-violet:#9d7bff; --aurora-rose:#ff5fa8;
+  --aurora-amber:#ffc25c; --aurora-blue:#4db8ff;
+  --success:#3dffa5; --danger:#ff4d7a; --warn:#ffb84d;
+  --text:#f8f6ff; --muted:#9c98c7; --dim:#615d94;
+  --radius-lg:20px; --radius-md:14px; --radius-sm:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--void);color:var(--text);font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  font-feature-settings:"cv11","ss01";
+}
+button,input,textarea,select{font-family:inherit;font-size:inherit;color:inherit;outline:none;border:none;background:none;appearance:none;-webkit-appearance:none}
+button{cursor:pointer}
+a{color:var(--aurora-teal);text-decoration:none}
+a:hover{text-decoration:underline}
+::selection{background:var(--aurora-violet);color:#fff}
+code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;background:rgba(45,245,200,.08);padding:3px 8px;border-radius:6px;color:var(--aurora-teal);word-break:break-all;border:1px solid rgba(45,245,200,.16)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:rgba(10,8,22,.4)}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--aurora-teal),var(--aurora-violet),var(--aurora-rose));border-radius:8px;border:2px solid var(--void)}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,var(--aurora-amber),var(--aurora-rose))}
+
+/* ─── COSMIC BACKGROUND ────────────────────────────────────── */
+.cosmos{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.cosmos::before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 90% 60% at 15% 0%,rgba(157,123,255,.16),transparent 60%),
+    radial-gradient(ellipse 80% 60% at 85% 100%,rgba(255,95,168,.14),transparent 60%),
+    radial-gradient(ellipse 100% 70% at 50% 50%,rgba(45,245,200,.06),transparent 70%);
+}
+.aurora{
+  position:absolute;left:-15%;right:-15%;height:70vh;top:-10%;
+  background:conic-gradient(from 180deg at 50% 50%,
+    rgba(45,245,200,.22),rgba(157,123,255,.22) 25%,rgba(255,95,168,.18) 50%,
+    rgba(255,194,92,.18) 75%,rgba(45,245,200,.22) 100%);
+  filter:blur(120px);opacity:.5;animation:auroraShift 24s ease-in-out infinite;border-radius:50%;
+}
+@keyframes auroraShift{
+  0%,100%{transform:translateX(0) rotate(0) scale(1)}
+  50%{transform:translateX(8%) rotate(8deg) scale(1.15)}
+}
+.stars{position:absolute;inset:0}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--dur,3s) ease-in-out infinite;animation-delay:var(--delay,0s)}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
+.grid-mesh{
+  position:absolute;inset:0;opacity:.35;
+  background-image:
+    linear-gradient(rgba(157,123,255,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(157,123,255,.07) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 40%,#000 10%,transparent 85%);
+  -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 40%,#000 10%,transparent 85%);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOGIN SCREEN — MEDIUM SIZE, KHATARNAK DESIGN
+   ═══════════════════════════════════════════════════════════════ */
+#loginScreen{
+  position:fixed;inset:0;z-index:1000;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;overflow-y:auto;
+  background:radial-gradient(circle at 50% 50%,rgba(10,8,22,.85),var(--void) 70%);
+  backdrop-filter:blur(6px);
+}
+.login-wrap{
+  position:relative;z-index:2;width:100%;max-width:400px;text-align:center;
+  animation:loginIn .9s cubic-bezier(.22,1,.36,1);
+}
+@keyframes loginIn{from{opacity:0;transform:translateY(30px) scale(.94)}to{opacity:1;transform:none}}
+
+/* Logo Orb — Compact 130px */
+.logo-orb{position:relative;width:130px;height:130px;margin:0 auto 18px}
+.orb-ring{
+  position:absolute;inset:0;border-radius:50%;border:1.5px solid transparent;
+  animation:spin linear infinite;
+}
+.orb-ring.r1{border-top-color:var(--aurora-teal);border-right-color:var(--aurora-teal);box-shadow:0 0 30px rgba(45,245,200,.5);animation-duration:5s}
+.orb-ring.r2{inset:16px;border-bottom-color:var(--aurora-rose);border-left-color:var(--aurora-rose);box-shadow:0 0 30px rgba(255,95,168,.45);animation-duration:7s;animation-direction:reverse}
+.orb-ring.r3{inset:32px;border-top-color:var(--aurora-amber);border-right-color:var(--aurora-amber);box-shadow:0 0 30px rgba(255,194,92,.45);animation-duration:4s}
+@keyframes spin{to{transform:rotate(360deg)}}
+.orb-core{
+  position:absolute;inset:44px;border-radius:50%;
+  background:
+    radial-gradient(circle at 30% 25%,rgba(157,123,255,.5),transparent 55%),
+    radial-gradient(circle at 70% 75%,rgba(255,95,168,.4),transparent 55%),
+    linear-gradient(135deg,#1a1740,#08060f);
+  border:2px solid rgba(45,245,200,.55);
+  display:grid;place-items:center;
+  font-size:30px;font-weight:900;color:var(--aurora-teal);
+  text-shadow:0 0 25px rgba(45,245,200,.9);
+  box-shadow:inset 0 0 40px rgba(45,245,200,.3),0 0 60px rgba(45,245,200,.35);
+  animation:orbPulse 3s ease-in-out infinite;letter-spacing:-1px;
+}
+@keyframes orbPulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.08);filter:brightness(1.25)}}
+.orb-dot{position:absolute;width:9px;height:9px;border-radius:50%;top:50%;left:50%;margin:-4.5px}
+.orb-dot.d1{background:var(--aurora-teal);box-shadow:0 0 16px var(--aurora-teal);animation:orbit1 7s linear infinite}
+.orb-dot.d2{background:var(--aurora-rose);box-shadow:0 0 16px var(--aurora-rose);animation:orbit2 9s linear infinite}
+.orb-dot.d3{background:var(--aurora-amber);box-shadow:0 0 16px var(--aurora-amber);animation:orbit3 5.5s linear infinite}
+@keyframes orbit1{from{transform:rotate(0) translateX(65px) rotate(0)}to{transform:rotate(360deg) translateX(65px) rotate(-360deg)}}
+@keyframes orbit2{from{transform:rotate(120deg) translateX(51px) rotate(-120deg)}to{transform:rotate(480deg) translateX(51px) rotate(-480deg)}}
+@keyframes orbit3{from{transform:rotate(240deg) translateX(37px) rotate(-240deg)}to{transform:rotate(600deg) translateX(37px) rotate(-600deg)}}
+
+/* Brand */
+.brand-h1{
+  font-size:24px;font-weight:900;letter-spacing:-.3px;line-height:1.15;margin-bottom:6px;
+  background:linear-gradient(95deg,var(--aurora-teal),var(--aurora-violet) 35%,var(--aurora-rose) 70%,var(--aurora-amber));
+  background-size:250% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:titleShift 5s ease infinite;
+  filter:drop-shadow(0 0 30px rgba(157,123,255,.35));
+}
+@keyframes titleShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.brand-h2{font-size:9.5px;color:var(--muted);letter-spacing:6px;font-weight:800;text-transform:uppercase;margin-bottom:24px}
+
+/* Login Card — Medium width, compact padding */
+.login-card{
+  position:relative;padding:26px 24px;border-radius:var(--radius-lg);
+  background:linear-gradient(160deg,rgba(22,18,44,.94),rgba(10,8,22,.98));
+  border:1px solid var(--border-hard);
+  box-shadow:0 25px 70px rgba(0,0,0,.65),0 0 60px rgba(157,123,255,.18),inset 0 1px rgba(255,255,255,.06);
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  animation:cardBreath 7s ease-in-out infinite;overflow:hidden;
+}
+.login-card::before{
+  content:"";position:absolute;inset:-2px;border-radius:calc(var(--radius-lg) + 2px);
+  padding:2px;
+  background:conic-gradient(from 0deg,var(--aurora-teal),var(--aurora-violet),var(--aurora-rose),var(--aurora-amber),var(--aurora-teal));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  opacity:.6;animation:spin 6s linear infinite;pointer-events:none;
+}
+@keyframes cardBreath{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+.mode-tabs{display:flex;background:rgba(0,0,0,.5);border:1px solid var(--border-soft);border-radius:12px;padding:4px;margin-bottom:16px}
+.mode-tabs button{flex:1;padding:10px;border-radius:9px;font-weight:800;font-size:12px;color:var(--muted);transition:.35s;letter-spacing:.3px}
+.mode-tabs button.on{
+  background:linear-gradient(135deg,var(--aurora-teal),var(--aurora-violet));
+  color:#0a0816;box-shadow:0 8px 24px rgba(45,245,200,.4),inset 0 1px rgba(255,255,255,.3);
+}
+
+.key-box{
+  width:100%;padding:15px 16px;background:rgba(0,0,0,.55);
+  border:1.5px solid var(--border-soft);border-radius:12px;
+  font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:1.5px;color:#fff;
+  transition:.35s;margin-bottom:14px;
+}
+.key-box:focus{
+  border-color:var(--aurora-teal);background:rgba(0,0,0,.7);
+  box-shadow:0 0 0 4px rgba(45,245,200,.1),0 0 35px rgba(45,245,200,.15);
+}
+.key-box::placeholder{color:var(--dim);letter-spacing:0;font-family:'Inter',sans-serif}
+
+.enter-btn{
+  width:100%;padding:15px;border-radius:12px;
+  font-weight:900;font-size:13.5px;letter-spacing:1px;
+  background:linear-gradient(120deg,var(--aurora-teal),var(--aurora-violet) 50%,var(--aurora-rose));
+  background-size:220% 100%;color:#0a0816;
+  box-shadow:0 12px 35px rgba(45,245,200,.35),inset 0 1px rgba(255,255,255,.4);
+  transition:.35s;animation:titleShift 4s ease infinite;
+  position:relative;overflow:hidden;
+}
+.enter-btn::after{
+  content:"";position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
+  transition:.7s;
+}
+.enter-btn:hover{transform:translateY(-2px) scale(1.01);box-shadow:0 18px 50px rgba(45,245,200,.5)}
+.enter-btn:hover::after{left:120%}
+.enter-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+.login-foot{margin-top:16px;font-size:10.5px;color:var(--dim);letter-spacing:.4px;text-align:center}
+.pulse-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 12px var(--success);margin-right:6px;animation:pulseDot 1.7s ease-in-out infinite}
+@keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+
+/* ═══════════════════════════════════════════════════════════════
+   APP SHELL
+   ═══════════════════════════════════════════════════════════════ */
+#app{display:none;position:relative;z-index:1;min-height:100vh}
+#app.on{display:block}
+
+.topbar{
+  position:sticky;top:0;z-index:60;height:68px;padding:0 20px;
+  display:flex;align-items:center;gap:14px;
+  background:rgba(5,4,10,.72);
+  backdrop-filter:blur(32px) saturate(160%);
+  -webkit-backdrop-filter:blur(32px) saturate(160%);
+  border-bottom:1px solid var(--border-soft);
+}
+.menu-btn{
+  width:44px;height:44px;flex-shrink:0;border-radius:12px;
+  display:grid;place-items:center;position:relative;overflow:hidden;
+  background:linear-gradient(145deg,rgba(157,123,255,.14),rgba(45,245,200,.06));
+  border:1px solid var(--border-soft);color:var(--text);transition:.35s;
+}
+.menu-btn:hover{border-color:var(--aurora-teal);color:var(--aurora-teal);box-shadow:0 0 25px rgba(45,245,200,.35);transform:translateY(-1px)}
+.menu-btn svg{width:20px;height:20px;stroke:currentColor;stroke-width:2.4;fill:none;stroke-linecap:round}
+
+.brand-chip{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.brand-chip .line1{
+  font-size:14px;font-weight:900;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:linear-gradient(90deg,var(--aurora-teal),var(--aurora-violet),var(--aurora-rose));
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:titleShift 6s ease infinite;
+}
+.brand-chip .line2{font-size:9px;color:var(--dim);letter-spacing:3px;font-weight:800}
+
+.topbar-right{display:flex;align-items:center;gap:10px}
+.bell-btn{
+  width:42px;height:42px;border-radius:11px;position:relative;
+  display:grid;place-items:center;background:rgba(255,255,255,.04);
+  border:1px solid var(--border-soft);color:var(--muted);transition:.3s;
+}
+.bell-btn:hover{color:var(--aurora-amber);border-color:var(--aurora-amber);box-shadow:0 0 20px rgba(255,194,92,.3)}
+.bell-btn .dot{position:absolute;top:9px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--danger);box-shadow:0 0 10px var(--danger);border:2px solid var(--void)}
+.bot-picker{
+  background:rgba(22,18,44,.85);border:1px solid var(--border-hard);
+  border-radius:11px;padding:9px 12px;color:#fff;font-size:11.5px;font-weight:700;
+  max-width:170px;cursor:pointer;transition:.3s;
+}
+.bot-picker:hover{border-color:var(--aurora-teal);box-shadow:0 0 20px rgba(45,245,200,.15)}
+.avatar{
+  width:44px;height:44px;border-radius:50%;position:relative;
+  display:grid;place-items:center;font-weight:900;font-size:15px;color:#0a0816;
+  background:conic-gradient(from 200deg,var(--aurora-teal),var(--aurora-violet),var(--aurora-rose),var(--aurora-amber),var(--aurora-teal));
+  box-shadow:0 0 25px rgba(157,123,255,.55),inset 0 1px rgba(255,255,255,.35);
+  transition:.4s;border:2px solid rgba(255,255,255,.2);
+}
+.avatar:hover{transform:scale(1.1) rotate(10deg);box-shadow:0 0 45px rgba(157,123,255,.8)}
+
+.scrim{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:.35s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{
+  position:fixed;top:0;left:0;bottom:0;width:320px;max-width:88vw;z-index:100;
+  background:linear-gradient(170deg,rgba(15,12,30,.99),rgba(8,6,18,.99));
+  border-right:1px solid var(--border-hard);
+  transform:translateX(-102%);transition:transform .45s cubic-bezier(.22,1,.36,1);
+  overflow-y:auto;box-shadow:50px 0 130px rgba(0,0,0,.8),0 0 100px rgba(157,123,255,.12);
+}
+.drawer.on{transform:translateX(0)}
+.drawer-top{padding:22px 20px 18px;border-bottom:1px solid var(--border-soft);position:sticky;top:0;background:rgba(15,12,30,.98);z-index:5;backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.drawer-top .name{font-size:16px;font-weight:900;letter-spacing:.4px}
+.drawer-top .name span{background:linear-gradient(90deg,var(--aurora-teal),var(--aurora-rose));-webkit-background-clip:text;background-clip:text;color:transparent}
+.drawer-top .sub{font-size:9px;color:var(--dim);letter-spacing:3px;margin-top:5px;font-weight:800}
+.drawer-close{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid var(--border-soft);display:grid;place-items:center;color:var(--text);font-size:15px;transition:.3s}
+.drawer-close:hover{background:rgba(255,77,122,.16);border-color:var(--danger);color:var(--danger);transform:rotate(90deg)}
+.drawer-nav{padding:16px 12px 40px}
+.nav-sect{margin-bottom:18px}
+.nav-sect-lbl{font-size:9.5px;color:var(--dim);text-transform:uppercase;letter-spacing:3px;padding:0 10px 8px;font-weight:900;display:flex;align-items:center;gap:10px}
+.nav-sect-lbl::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--border-soft),transparent)}
+.nav-btn{
+  display:flex;align-items:center;gap:12px;width:100%;
+  padding:11px 13px;border-radius:11px;color:var(--muted);font-size:13px;font-weight:700;
+  transition:.3s;margin-bottom:3px;border:1px solid transparent;text-align:left;position:relative;overflow:hidden;
+}
+.nav-btn::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--aurora-teal),var(--aurora-rose));transform:scaleY(0);transition:.3s}
+.nav-btn:hover{background:linear-gradient(100deg,rgba(45,245,200,.08),rgba(157,123,255,.05));color:#fff;border-color:rgba(45,245,200,.2);transform:translateX(4px)}
+.nav-btn:hover::before{transform:scaleY(1)}
+.nav-btn.on{background:linear-gradient(100deg,rgba(45,245,200,.16),rgba(157,123,255,.08),transparent);color:var(--aurora-teal);border-color:rgba(45,245,200,.3);box-shadow:inset 3px 0 0 var(--aurora-teal)}
+.nav-btn.on::before{transform:scaleY(1)}
+.nav-ico{width:24px;height:24px;flex-shrink:0;display:grid;place-items:center;font-size:16px}
+.nav-btn.on .nav-ico{filter:drop-shadow(0 0 10px rgba(45,245,200,.7))}
+
+.main{padding:22px 20px 90px;max-width:1600px;margin:0 auto}
+.head{animation:headIn .55s cubic-bezier(.22,1,.36,1);margin-bottom:22px}
+.head .kicker{font-size:10px;color:var(--aurora-teal);letter-spacing:4px;font-weight:800;text-transform:uppercase;margin-bottom:6px}
+.head h1{
+  font-size:28px;font-weight:900;letter-spacing:-.8px;line-height:1.15;
+  background:linear-gradient(90deg,#fff,var(--aurora-teal) 45%,var(--aurora-violet));
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:titleShift 6s ease infinite;
+}
+.head p{font-size:13px;color:var(--muted);margin-top:7px;line-height:1.6}
+.view{animation:viewIn .5s cubic-bezier(.22,1,.36,1)}
+@keyframes viewIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes headIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+
+.glass{
+  background:linear-gradient(155deg,rgba(30,24,58,.62),rgba(14,11,28,.86));
+  border:1px solid var(--border-soft);border-radius:var(--radius-lg);padding:22px;
+  backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);
+  position:relative;overflow:hidden;transition:.4s cubic-bezier(.22,1,.36,1);
+}
+.glass::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(45,245,200,.7),rgba(157,123,255,.7),transparent);opacity:0;transition:.4s}
+.glass:hover{border-color:var(--border-hard);transform:translateY(-4px);box-shadow:0 26px 60px rgba(0,0,0,.5),0 0 60px rgba(157,123,255,.14)}
+.glass:hover::before{opacity:1}
+
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(270px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+
+.hero{
+  position:relative;overflow:hidden;padding:28px;border-radius:calc(var(--radius-lg) + 4px);margin-bottom:20px;
+  background:
+    radial-gradient(circle at 20% 20%,rgba(45,245,200,.16),transparent 50%),
+    radial-gradient(circle at 80% 70%,rgba(255,95,168,.16),transparent 50%),
+    linear-gradient(140deg,rgba(22,18,44,.9),rgba(10,8,22,.96));
+  border:1px solid var(--border-hard);
+  box-shadow:0 26px 70px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.06);
+}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 40% at 90% 15%,rgba(45,245,200,.14),transparent 60%),radial-gradient(ellipse 50% 30% at 10% 90%,rgba(255,194,92,.12),transparent 60%)}
+.hero-inner{position:relative;display:flex;gap:20px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.hero-copy{flex:1;min-width:260px}
+.hero-copy .kicker{font-size:10px;color:var(--aurora-teal);letter-spacing:4px;font-weight:800;text-transform:uppercase;margin-bottom:8px}
+.hero-copy h2{font-size:24px;font-weight:900;letter-spacing:-.7px;line-height:1.15;margin-bottom:10px;background:linear-gradient(90deg,#fff,var(--aurora-teal) 45%,var(--aurora-rose));background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:titleShift 5s ease infinite}
+.hero-copy p{color:var(--muted);font-size:13px;line-height:1.65;max-width:560px}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chip{padding:7px 13px;border-radius:20px;background:rgba(0,0,0,.4);border:1px solid var(--border-hard);font-size:11px;font-weight:800;letter-spacing:.3px;display:inline-flex;align-items:center;gap:6px}
+
+.stat{padding:22px;position:relative;overflow:hidden}
+.stat .ico{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:20px;margin-bottom:14px;background:linear-gradient(145deg,rgba(45,245,200,.16),rgba(45,245,200,.04));border:1px solid rgba(45,245,200,.28);transition:.5s}
+.stat:hover .ico{transform:rotate(-10deg) scale(1.1)}
+.stat .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2.5px;font-weight:900}
+.stat .val{font-size:30px;font-weight:800;margin-top:8px;letter-spacing:-1.2px;line-height:1;background:linear-gradient(135deg,#fff,var(--aurora-teal));-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace}
+.stat.v2 .ico{background:linear-gradient(145deg,rgba(157,123,255,.18),rgba(157,123,255,.04));border-color:rgba(157,123,255,.3)}
+.stat.v2 .val{background:linear-gradient(135deg,#fff,var(--aurora-violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat.v3 .ico{background:linear-gradient(145deg,rgba(255,95,168,.18),rgba(255,95,168,.04));border-color:rgba(255,95,168,.3)}
+.stat.v3 .val{background:linear-gradient(135deg,#fff,var(--aurora-rose));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat.v4 .ico{background:linear-gradient(145deg,rgba(255,194,92,.18),rgba(255,194,92,.04));border-color:rgba(255,194,92,.3)}
+.stat.v4 .val{background:linear-gradient(135deg,#fff,var(--aurora-amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:12px;
+  font-weight:800;font-size:12.5px;letter-spacing:.3px;
+  border:1px solid var(--border-hard);
+  background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.015));
+  color:var(--text);transition:.35s;position:relative;overflow:hidden;
+}
+.btn:hover{background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.04));border-color:var(--aurora-teal);color:var(--aurora-teal);transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.4),0 0 30px rgba(45,245,200,.2)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn.primary{background:linear-gradient(120deg,var(--aurora-teal),var(--aurora-violet) 60%,var(--aurora-rose));background-size:220% 100%;color:#0a0816;border-color:transparent;box-shadow:0 10px 35px rgba(45,245,200,.35),inset 0 1px rgba(255,255,255,.35);animation:titleShift 4s ease infinite}
+.btn.primary:hover{transform:translateY(-3px);box-shadow:0 16px 50px rgba(45,245,200,.55);color:#0a0816}
+.btn.ghost{background:transparent;border-color:var(--border-soft)}
+.btn.ghost:hover{background:rgba(255,255,255,.05)}
+.btn.danger{background:linear-gradient(145deg,rgba(255,77,122,.18),rgba(255,77,122,.06));border-color:rgba(255,77,122,.45);color:#ff7d9e}
+.btn.danger:hover{background:rgba(255,77,122,.28);border-color:var(--danger);color:#ff9eb6;box-shadow:0 0 30px rgba(255,77,122,.35)}
+.btn.success{background:linear-gradient(145deg,rgba(61,255,165,.18),rgba(61,255,165,.06));border-color:rgba(61,255,165,.45);color:#7effc5}
+.btn.success:hover{background:rgba(61,255,165,.28);border-color:var(--success);color:#b3ffdb;box-shadow:0 0 30px rgba(61,255,165,.35)}
+.btn.sm{padding:7px 13px;font-size:11px;border-radius:9px}
+.btn.xs{padding:5px 10px;font-size:10.5px;border-radius:8px;gap:5px}
+
+.input,.ta,.sel{
+  width:100%;padding:13px 15px;background:rgba(0,0,0,.45);
+  border:1.5px solid var(--border-soft);border-radius:12px;
+  transition:.35s;font-size:13px;color:#fff;
+}
+.input:focus,.ta:focus,.sel:focus{
+  border-color:var(--aurora-teal);background:rgba(0,0,0,.6);
+  box-shadow:0 0 0 4px rgba(45,245,200,.08),0 0 30px rgba(45,245,200,.12);
+}
+.ta{resize:vertical;min-height:100px;font-family:inherit;line-height:1.6}
+.sel{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' stroke='%239c98c7' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 14px center;padding-right:40px;cursor:pointer}
+.label{display:block;font-size:10px;color:var(--muted);font-weight:900;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:8px}
+.field{margin-bottom:16px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.field-row{grid-template-columns:1fr}}
+
+.tbl-wrap{overflow-x:auto;border-radius:16px;border:1px solid var(--border-soft);background:rgba(10,8,22,.6);backdrop-filter:blur(14px)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead{position:sticky;top:0;background:rgba(20,16,42,.98);backdrop-filter:blur(14px);z-index:2}
+th{text-align:left;padding:14px 16px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1.6px;font-weight:900;border-bottom:1px solid var(--border-soft);white-space:nowrap}
+td{padding:14px 16px;border-bottom:1px solid rgba(157,123,255,.08);vertical-align:middle}
+tbody tr{transition:.25s}
+tbody tr:hover{background:linear-gradient(90deg,rgba(45,245,200,.05),transparent)}
+tbody tr:last-child td{border-bottom:none}
+.empty-cell{text-align:center;color:var(--dim);padding:50px 15px;font-size:12.5px}
+
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:10px;font-weight:900;letter-spacing:.5px;text-transform:uppercase}
+.pill.ok{background:rgba(61,255,165,.12);color:var(--success);border:1px solid rgba(61,255,165,.3);box-shadow:0 0 12px rgba(61,255,165,.12)}
+.pill.pend{background:rgba(255,184,77,.12);color:var(--warn);border:1px solid rgba(255,184,77,.3)}
+.pill.off{background:rgba(255,77,122,.1);color:#ff7d9e;border:1px solid rgba(255,77,122,.25)}
+.pill.info{background:rgba(77,184,255,.1);color:var(--aurora-blue);border:1px solid rgba(77,184,255,.28)}
+.pill.maint{background:rgba(255,95,168,.1);color:var(--aurora-rose);border:1px solid rgba(255,95,168,.28)}
+.pill.warn{background:rgba(255,184,77,.12);color:var(--warn);border:1px solid rgba(255,184,77,.3)}
+
+.badge{display:inline-block;padding:4px 11px;border-radius:20px;font-size:10px;font-weight:900;background:linear-gradient(120deg,var(--aurora-teal),var(--aurora-violet));color:#0a0816;letter-spacing:.5px}
+
+.modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.82);backdrop-filter:blur(16px)}
+.modal.on{display:flex;animation:fadeIn .28s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-inner{
+  width:100%;max-width:660px;max-height:92vh;overflow-y:auto;
+  padding:26px;border-radius:22px;
+  background:linear-gradient(160deg,#16122e,#0a0816);
+  border:1px solid var(--border-hard);
+  box-shadow:0 50px 140px rgba(0,0,0,.85),0 0 100px rgba(157,123,255,.18);
+  animation:modalIn .4s cubic-bezier(.22,1,.36,1);position:relative;
+}
+.modal-inner::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--aurora-teal),var(--aurora-violet),var(--aurora-rose),var(--aurora-amber));border-radius:22px 22px 0 0}
+@keyframes modalIn{from{opacity:0;transform:translateY(24px) scale(.94)}to{opacity:1;transform:none}}
+.modal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;gap:12px}
+.modal-top h3{font-size:20px;font-weight:900;letter-spacing:-.3px}
+.x-btn{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.05);border:1px solid var(--border-soft);display:grid;place-items:center;font-size:16px;color:var(--text);transition:.3s}
+.x-btn:hover{background:rgba(255,77,122,.16);border-color:var(--danger);color:var(--danger);transform:rotate(90deg)}
+
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:300;
+  max-width:min(400px,calc(100vw - 32px));
+  padding:14px 20px;border-radius:14px;
+  background:linear-gradient(135deg,rgba(22,18,44,.99),rgba(10,8,22,.99));
+  border:1px solid var(--border-hard);
+  box-shadow:0 25px 70px rgba(0,0,0,.65),0 0 55px rgba(157,123,255,.18);
+  display:none;align-items:center;gap:12px;font-weight:700;font-size:12.5px;
+  backdrop-filter:blur(20px);
+}
+.toast.on{display:flex;animation:toastIn .4s cubic-bezier(.22,1,.36,1)}
+@keyframes toastIn{from{opacity:0;transform:translateY(24px) translateX(24px)}to{opacity:1;transform:none}}
+.toast.ok{border-color:rgba(61,255,165,.5)}
+.toast.err{border-color:rgba(255,77,122,.55)}
+.toast .ti{font-size:18px}
+
+.notify-pop{
+  position:fixed;top:74px;right:20px;z-index:150;width:340px;max-width:calc(100vw - 40px);
+  border-radius:18px;padding:20px;
+  background:linear-gradient(160deg,#16122e,#0a0816);
+  border:1px solid var(--border-hard);
+  box-shadow:0 40px 100px rgba(0,0,0,.75),0 0 70px rgba(157,123,255,.16);
+  display:none;
+}
+.notify-pop.on{display:block;animation:toastIn .35s}
+.notify-pop h4{font-size:14px;font-weight:900;margin-bottom:12px}
+.notify-item{padding:10px 0;border-bottom:1px solid var(--border-soft);display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--muted)}
+.notify-item:last-child{border-bottom:none}
+.notify-item .di{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(45,245,200,.12);color:var(--aurora-teal);flex-shrink:0;font-size:15px}
+
+/* Media preview */
+.media-preview{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(45,245,200,.06);border:1px solid rgba(45,245,200,.25);border-radius:12px;margin-top:10px}
+.media-preview .ico{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:20px;background:rgba(45,245,200,.12)}
+.media-preview .info{flex:1;min-width:0}
+.media-preview .info b{font-size:12px;display:block;margin-bottom:2px}
+.media-preview .info span{font-size:11px;color:var(--muted);word-break:break-all;display:block;max-height:32px;overflow:hidden}
+
+.fab{
+  position:fixed;bottom:24px;right:24px;z-index:70;
+  width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:22px;color:#0a0816;
+  background:linear-gradient(135deg,var(--aurora-teal),var(--aurora-violet),var(--aurora-rose));
+  background-size:220% 100%;animation:titleShift 4s ease infinite;
+  box-shadow:0 18px 50px rgba(45,245,200,.5),inset 0 1px rgba(255,255,255,.4);
+  transition:.4s cubic-bezier(.22,1,.36,1);
+}
+.fab:hover{transform:scale(1.15) rotate(135deg);box-shadow:0 22px 65px rgba(45,245,200,.7)}
+
+.cmdk{position:fixed;inset:0;z-index:400;display:none;align-items:flex-start;justify-content:center;padding:100px 18px 18px;background:rgba(0,0,0,.78);backdrop-filter:blur(12px)}
+.cmdk.on{display:flex;animation:fadeIn .22s}
+.cmdk-box{width:100%;max-width:600px;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#16122e,#0a0816);border:1px solid var(--border-hard);box-shadow:0 40px 120px rgba(0,0,0,.85),0 0 80px rgba(157,123,255,.2);animation:modalIn .3s cubic-bezier(.22,1,.36,1)}
+.cmdk-box .inp{width:100%;padding:20px 24px;background:transparent;border:none;border-bottom:1px solid var(--border-soft);font-size:15px;color:#fff}
+.cmdk-box .inp::placeholder{color:var(--dim)}
+.cmdk-list{max-height:380px;overflow-y:auto;padding:8px}
+.cmdk-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:11px;color:var(--muted);font-weight:700;font-size:13px;transition:.2s;cursor:pointer}
+.cmdk-item:hover,.cmdk-item.hi{background:linear-gradient(90deg,rgba(45,245,200,.12),transparent);color:#fff;border-left:3px solid var(--aurora-teal)}
+.cmdk-item .ci{width:24px;text-align:center;font-size:16px}
+.cmdk-item .ck{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:1px;padding:3px 7px;background:rgba(255,255,255,.05);border-radius:5px}
+
+.flex{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.between{justify-content:space-between}
+.mt-2{margin-top:14px}.mb-2{margin-bottom:14px}.mb-3{margin-bottom:20px}
+.muted{color:var(--muted)}.dim{color:var(--dim)}.sm{font-size:11.5px}
+.center{text-align:center}.w-full{width:100%}.hidden{display:none!important}
+
+@media(max-width:720px){
+  .main{padding:14px 12px 100px}
+  .topbar{padding:0 12px;height:62px;gap:8px}
+  .brand-chip .line1{font-size:12px}
+  .brand-chip .line2{letter-spacing:2.5px;font-size:8px}
+  .brand-h1{font-size:22px}
+  .brand-h2{letter-spacing:4px;font-size:9px;margin-bottom:20px}
+  .logo-orb{width:110px;height:110px}
+  .orb-core{inset:38px;font-size:26px}
+  .stat .val{font-size:24px}
+  .head h1{font-size:22px}
+  .hero-copy h2{font-size:20px}
+  .hero{padding:20px}
+  .bot-picker{max-width:110px;font-size:11px;padding:7px 9px}
+  .toast{right:12px;left:12px;bottom:12px;max-width:none}
+  .fab{bottom:16px;right:16px;width:50px;height:50px;font-size:20px}
+  .notify-pop{right:10px;left:10px;width:auto}
+  .cmdk{padding:70px 10px 18px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<div class="cosmos">
+  <div class="aurora"></div>
+  <div class="stars" id="stars"></div>
+  <div class="grid-mesh"></div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-wrap">
+    <div class="logo-orb">
+      <span class="orb-ring r1"></span>
+      <span class="orb-ring r2"></span>
+      <span class="orb-ring r3"></span>
+      <span class="orb-dot d1"></span>
+      <span class="orb-dot d2"></span>
+      <span class="orb-dot d3"></span>
+      <div class="orb-core">S</div>
+    </div>
+    <h1 class="brand-h1">SHIVAM BOT BUILDER</h1>
+    <p class="brand-h2">NEXUS CONTROL CENTER</p>
+
+    <div class="login-card">
+      <div class="mode-tabs" id="modeTabs">
+        <button data-mode="user" class="on">🔑 User Key</button>
+        <button data-mode="admin">🛡️ Admin Key</button>
+      </div>
+      <input type="password" class="key-box" id="loginKey" placeholder="Paste your access key..." autocomplete="off" spellcheck="false">
+      <button class="enter-btn" id="loginBtn" onclick="doLogin()">⚡ ENTER NEXUS</button>
+      <div class="login-foot"><span class="pulse-dot"></span>Secure Session • Device-Locked • AES-256</div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header class="topbar">
+    <button class="menu-btn" onclick="openNav()" aria-label="Menu">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+    </button>
+    <div class="brand-chip">
+      <div class="line1">SHIVAM BOT BUILDER</div>
+      <div class="line2">NEXUS</div>
+    </div>
+    <div class="topbar-right">
+      <button class="bell-btn" onclick="toggleNotify()">
+        <span style="font-size:17px">🔔</span>
+        <span class="dot" id="bellDot" style="display:none"></span>
+      </button>
+      <select id="botPicker" class="bot-picker" onchange="switchBot(this.value)"></select>
+      <button class="avatar" id="avatar" onclick="go('profile')">S</button>
+    </div>
+  </header>
+
+  <div class="notify-pop" id="notifyPop">
+    <h4>🔔 Notifications</h4>
+    <div id="notifyList">
+      <div class="notify-item"><div class="di">✅</div><div><b>System ready</b><br><span class="dim">Nexus control center is live</span></div></div>
+      <div class="notify-item"><div class="di">🔐</div><div><b>Secure session</b><br><span class="dim">CSRF + session cookie active</span></div></div>
+    </div>
+  </div>
+
+  <div class="scrim" id="scrim" onclick="closeNav()"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-top">
+      <div>
+        <div class="name">SHIVAM <span>BOT BUILDER</span></div>
+        <div class="sub">NEXUS</div>
+      </div>
+      <button class="drawer-close" onclick="closeNav()">✕</button>
+    </div>
+    <nav class="drawer-nav" id="navList"></nav>
+  </aside>
+
+  <main class="main"><div id="view" class="view"></div></main>
+  <button class="fab" onclick="openCmdk()" title="Command Palette (Ctrl+K)">⚡</button>
+</div>
+
+<div class="cmdk" id="cmdk" onclick="if(event.target===this)closeCmdk()">
+  <div class="cmdk-box">
+    <input class="inp" id="cmdkInput" placeholder="Search pages, actions, bots..." autocomplete="off">
+    <div class="cmdk-list" id="cmdkList"></div>
+  </div>
+</div>
+
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-inner" id="modalInner"></div>
+</div>
+
+<div class="toast" id="toast">
+  <span class="ti" id="toastIcon">✅</span>
+  <span id="toastText"></span>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   COSMIC BG
+   ═══════════════════════════════════════════════════════════ */
+(function initStars(){
+  const s=document.getElementById('stars');
+  for(let i=0;i<100;i++){
+    const st=document.createElement('div');st.className='star';
+    const sz=Math.random()*2+.4;
+    st.style.width=st.style.height=sz+'px';
+    st.style.left=Math.random()*100+'%';
+    st.style.top=Math.random()*100+'%';
+    st.style.setProperty('--dur',(2+Math.random()*4)+'s');
+    st.style.setProperty('--delay',(Math.random()*5)+'s');
+    st.style.opacity=.2+Math.random()*.8;
+    if(Math.random()>.7){st.style.background='#2ff5c8';st.style.boxShadow='0 0 8px #2ff5c8'}
+    else if(Math.random()>.6){st.style.background='#ff5fa8';st.style.boxShadow='0 0 8px #ff5fa8'}
+    s.appendChild(st);
+  }
+})();
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════ */
+let csrf='', me=null, bots=[], botId=null, page='dashboard', authMode='user';
+const $=(s)=>document.querySelector(s);
+const $$=(s)=>document.querySelectorAll(s);
+
+function esc(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmt(d){try{return new Date(d).toLocaleString()}catch{return d||'—'}}
+function money(x){return '₹'+Number(x||0).toFixed(2)}
+function toast(msg,type='ok'){
+  const t=$('#toast');
+  t.className='toast on '+type;
+  $('#toastIcon').textContent=type==='err'?'❌':'✅';
+  $('#toastText').textContent=msg;
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),3500);
+}
+function openNav(){$('#drawer').classList.add('on');$('#scrim').classList.add('on')}
+function closeNav(){$('#drawer').classList.remove('on');$('#scrim').classList.remove('on')}
+function showModal(html){$('#modalInner').innerHTML=html;$('#modal').classList.add('on')}
+function closeModal(){$('#modal').classList.remove('on')}
+function copyTxt(t){navigator.clipboard.writeText(t).then(()=>toast('Copied!')).catch(()=>toast('Copy failed','err'))}
+function toggleNotify(){$('#notifyPop').classList.toggle('on')}
+
+/* ═══════════════════════════════════════════════════════════
+   API
+   ═══════════════════════════════════════════════════════════ */
+async function api(url,opts={}){
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),20000);
+  try{
+    const headers={'Content-Type':'application/json',...(opts.headers||{})};
+    if(csrf) headers['X-CSRF-Token']=csrf;
+    const res=await fetch(url,{...opts,signal:ctrl.signal,headers});
+    clearTimeout(t);
+    let data={};try{data=await res.json()}catch{}
+    if(!res.ok||(data&&data.ok===false)){
+      if(res.status===401){logout(false);throw new Error('Session expired')}
+      throw new Error(data.message||`Request failed (${res.status})`);
+    }
+    return data;
+  }catch(e){
+    clearTimeout(t);
+    if(e.name==='AbortError') throw new Error('Request timed out');
+    throw e;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AUTH
+   ═══════════════════════════════════════════════════════════ */
+document.querySelectorAll('#modeTabs button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('#modeTabs button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');authMode=b.dataset.mode;
+    $('#loginKey').placeholder=authMode==='admin'?'Paste Admin Key...':'Paste User Key...';
+  };
+});
+async function doLogin(){
+  const key=$('#loginKey').value.trim();
+  if(!key) return toast('Enter your key','err');
+  const btn=$('#loginBtn');btn.disabled=true;btn.textContent='🔄 VERIFYING...';
+  try{
+    const data=await api('/api/auth/login',{method:'POST',body:JSON.stringify({key})});
+    csrf=data.csrf||'';me=data.user;
+    showApp();await loadBots();go('dashboard');
+    toast('Welcome, '+(me.username||'User')+'!');
+  }catch(e){toast('Login failed: '+e.message,'err')}
+  finally{btn.disabled=false;btn.textContent='⚡ ENTER NEXUS'}
+}
+$('#loginKey').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+function showApp(){
+  $('#loginScreen').style.display='none';
+  $('#app').classList.add('on');
+  $('#avatar').textContent=(me?.username||'U')[0].toUpperCase();
+}
+async function logout(reload=true){
+  try{await api('/api/auth/logout',{method:'POST'})}catch{}
+  csrf='';me=null;bots=[];botId=null;
+  if(reload){
+    $('#loginScreen').style.display='flex';
+    $('#app').classList.remove('on');
+    $('#loginKey').value='';
+    toast('Logged out');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOTS
+   ═══════════════════════════════════════════════════════════ */
+async function loadBots(){
+  try{
+    const d=await api('/api/bots');bots=d.bots||[];
+    const sel=$('#botPicker');
+    if(bots.length){
+      sel.innerHTML=bots.map(b=>`<option value="${b.id}">🤖 ${esc(b.name)}</option>`).join('');
+      if(!botId||!bots.find(b=>b.id===botId)) botId=bots[0].id;
+      sel.value=botId;
+    }else{sel.innerHTML='<option>No bots</option>';botId=null}
+  }catch{bots=[];botId=null}
+}
+function switchBot(id){botId=parseInt(id)||null;if(botId)go(page)}
+
+/* ═══════════════════════════════════════════════════════════
+   NAV
+   ═══════════════════════════════════════════════════════════ */
+const NAV=[
+  {t:'OVERVIEW',items:[{id:'dashboard',ico:'◆',lbl:'Dashboard'},{id:'create',ico:'＋',lbl:'Create Bot'}]},
+  {t:'STORE',items:[
+    {id:'products',ico:'🛍️',lbl:'Products'},
+    {id:'display-text',ico:'✏️',lbl:'Display Text'},
+    {id:'keys',ico:'🔑',lbl:'License Keys'},
+    {id:'id-stock',ico:'🆔',lbl:'ID Stock'},
+    {id:'product-links',ico:'🔗',lbl:'Product Links'},
+    {id:'coupons',ico:'🎟️',lbl:'Coupons'},
+  ]},
+  {t:'ORDERS',items:[
+    {id:'orders',ico:'📦',lbl:'Product Orders'},
+    {id:'pending-orders',ico:'⏳',lbl:'Pending Orders'},
+    {id:'topups',ico:'💳',lbl:'Top-ups'},
+    {id:'delivery-logs',ico:'📜',lbl:'Delivery Logs'},
+  ]},
+  {t:'USERS',items:[
+    {id:'members',ico:'👥',lbl:'Members'},
+    {id:'resellers',ico:'🏪',lbl:'Resellers'},
+    {id:'broadcast',ico:'📢',lbl:'Broadcast'},
+  ]},
+  {t:'PAYMENTS',items:[
+    {id:'gateway',ico:'💎',lbl:'FamGateway'},
+    {id:'api-setup',ico:'⚙️',lbl:'Key Delivery API'},
+  ]},
+  {t:'ACCOUNT',items:[
+    {id:'settings',ico:'⚡',lbl:'Store Settings'},
+    {id:'profile',ico:'👤',lbl:'My Profile'},
+  ]},
+  {t:'ADMIN',adminOnly:true,items:[{id:'admin-keys',ico:'🛡️',lbl:'Manage Keys'}]},
+];
+function renderNav(active){
+  const isAdmin=me?.role==='admin';
+  let html='';
+  NAV.forEach(g=>{
+    if(g.adminOnly&&!isAdmin) return;
+    html+=`<div class="nav-sect"><div class="nav-sect-lbl">${g.t}</div>`;
+    g.items.forEach(it=>{
+      html+=`<button class="nav-btn ${it.id===active?'on':''}" onclick="go('${it.id}')">
+        <span class="nav-ico">${it.ico}</span><span>${it.lbl}</span></button>`;
+    });
+    html+='</div>';
+  });
+  $('#navList').innerHTML=html;
+}
+const PAGES={
+  'dashboard':pgDashboard,'create':pgCreateBot,
+  'products':pgProducts,'display-text':pgDisplayText,'keys':pgKeys,'id-stock':pgIdStock,
+  'product-links':pgProductLinks,'coupons':pgCoupons,
+  'orders':pgOrders,'pending-orders':pgPendingOrders,'topups':pgTopups,'delivery-logs':pgDeliveryLogs,
+  'members':pgMembers,'resellers':pgResellers,'broadcast':pgBroadcast,
+  'gateway':pgGateway,'api-setup':pgApiSetup,
+  'settings':pgSettings,'profile':pgProfile,'admin-keys':pgAdminKeys,
+};
+async function go(p){
+  if(!PAGES[p]) p='dashboard';
+  page=p;renderNav(p);closeNav();location.hash=p;
+  const needsBot=!['create','profile','admin-keys','dashboard'].includes(p)&&!botId;
+  if(needsBot){
+    $('#view').innerHTML=`<div class="head"><div class="kicker">⚠️ NO BOT</div><h1>Pick a Bot First</h1></div>
+      <div class="glass" style="padding:30px;text-align:center">
+        <div style="font-size:46px;margin-bottom:12px">🤖</div>
+        <p class="muted mb-2">No bot selected</p>
+        <button class="btn primary" onclick="go('create')">＋ Create Bot</button></div>`;
+    return;
+  }
+  try{await PAGES[p]()}catch(e){
+    console.error(e);
+    $('#view').innerHTML=`<div class="glass" style="padding:28px">
+      <h3 style="color:var(--danger);margin-bottom:12px">⚠️ Error</h3>
+      <p class="muted mb-2">${esc(e.message)}</p>
+      <button class="btn" onclick="go('${p}')">🔄 Retry</button></div>`;
+    toast(e.message,'err');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CMDK
+   ═══════════════════════════════════════════════════════════ */
+function buildCmdk(q=''){
+  const ql=q.toLowerCase().trim();
+  const isAdmin=me?.role==='admin';
+  const items=[];
+  NAV.forEach(g=>{
+    if(g.adminOnly&&!isAdmin) return;
+    g.items.forEach(it=>items.push({ico:it.ico,lbl:it.lbl,act:()=>go(it.id),group:g.t}));
+  });
+  bots.forEach(b=>items.push({ico:'🤖',lbl:b.name,act:()=>{botId=b.id;switchBot(b.id)},group:'BOTS'}));
+  const filtered=ql?items.filter(i=>i.lbl.toLowerCase().includes(ql)||i.group.toLowerCase().includes(ql)):items.slice(0,12);
+  $('#cmdkList').innerHTML=filtered.length?filtered.map((it,i)=>
+    `<div class="cmdk-item ${i===0?'hi':''}" onclick='closeCmdk();(${it.act.toString()})()'>
+      <span class="ci">${it.ico}</span><span>${esc(it.lbl)}</span>
+      <span class="ck">${it.group}</span></div>`
+  ).join(''):'<div class="cmdk-item" style="justify-content:center;color:var(--dim)">No results</div>';
+}
+function openCmdk(){buildCmdk();$('#cmdk').classList.add('on');setTimeout(()=>$('#cmdkInput').focus(),50)}
+function closeCmdk(){$('#cmdk').classList.remove('on');$('#cmdkInput').value=''}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeModal();closeNav();closeCmdk();$('#notifyPop')?.classList.remove('on')}
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();openCmdk()}
+});
+document.addEventListener('input',e=>{if(e.target.id==='cmdkInput')buildCmdk(e.target.value)});
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: DASHBOARD
+   ═══════════════════════════════════════════════════════════ */
+async function pgDashboard(){
+  let s={members:0,products:0,keys:0,orders:0,delivered:0,revenue:0,topups:0,pending:0};
+  if(botId){try{const d=await api(`/api/summary/${botId}`);s=d.stats||s}catch{}}
+  const botList=bots.length?bots.map(b=>`
+    <div class="glass" style="padding:15px;cursor:pointer;border-radius:13px" onclick="botId=${b.id};switchBot(${b.id})">
+      <div class="flex between" style="gap:8px">
+        <div style="min-width:0;flex:1">
+          <div style="font-weight:900;font-size:13px;margin-bottom:4px">🤖 ${esc(b.name)}</div>
+          <div class="muted sm">@${esc(b.username||'unknown')}</div></div>
+        <span class="pill ${b.status==='online'?'ok':'off'}">${b.status==='online'?'● LIVE':'○ OFF'}</span>
+      </div></div>`).join(''):`
+    <div class="glass" style="padding:22px;text-align:center">
+      <div style="font-size:38px;margin-bottom:10px">🤖</div>
+      <p class="muted mb-2">No bots deployed yet</p>
+      <button class="btn primary" onclick="go('create')">＋ Create Bot</button></div>`;
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">◆ COMMAND CENTER</div><h1>Welcome back, ${esc(me?.username||'User')}</h1><p>Your cosmic control hub for bots, orders, and everything in between.</p></div>
+    <div class="hero"><div class="hero-inner">
+      <div class="hero-copy">
+        <div class="kicker">🚀 SYSTEM ONLINE</div>
+        <h2>Build. Deploy. Dominate.</h2>
+        <p>Manage unlimited bots, products, keys, orders, and members — all from one ultra-premium cosmic dashboard.</p>
+        <div class="chip-row">
+          <span class="chip"><span style="width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 10px var(--success);display:inline-block"></span> Live</span>
+          <span class="chip">🤖 ${bots.length} Bot${bots.length!==1?'s':''}</span>
+          <span class="chip">🔐 Encrypted</span>
+          <span class="chip">⚡ Real-time</span>
+        </div></div>
+      <button class="btn primary" onclick="go('create')">＋ Deploy New Bot</button>
+    </div></div>
+    <div class="grid g4">
+      <div class="glass stat"><div class="ico">👥</div><div class="lbl">Members</div><div class="val">${s.members||0}</div></div>
+      <div class="glass stat v4"><div class="ico">💰</div><div class="lbl">Revenue</div><div class="val">${money(s.revenue)}</div></div>
+      <div class="glass stat v2"><div class="ico">📦</div><div class="lbl">Orders</div><div class="val">${s.orders||0}</div></div>
+      <div class="glass stat v3"><div class="ico">🔑</div><div class="lbl">Keys In Stock</div><div class="val">${s.keys||0}</div></div>
+    </div>
+    <div class="grid g4 mt-2">
+      <div class="glass stat v2"><div class="ico">🛍️</div><div class="lbl">Products</div><div class="val">${s.products||0}</div></div>
+      <div class="glass stat"><div class="ico">✅</div><div class="lbl">Delivered</div><div class="val">${s.delivered||0}</div></div>
+      <div class="glass stat v4"><div class="ico">⏳</div><div class="lbl">Pending</div><div class="val">${s.pending||0}</div></div>
+      <div class="glass stat v3"><div class="ico">💳</div><div class="lbl">Top-ups</div><div class="val">${money(s.topups)}</div></div>
+    </div>
+    <div class="grid g2 mt-2">
+      <div class="glass">
+        <h3 style="font-size:14px;font-weight:900;margin-bottom:16px">⚡ QUICK ACTIONS</h3>
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">
+          <button class="btn" onclick="go('products')">🛍️ Products</button>
+          <button class="btn" onclick="go('keys')">🔑 Keys</button>
+          <button class="btn" onclick="go('orders')">📦 Orders</button>
+          <button class="btn" onclick="go('members')">👥 Members</button>
+          <button class="btn" onclick="go('broadcast')">📢 Broadcast</button>
+          <button class="btn" onclick="go('coupons')">🎟️ Coupons</button>
+          <button class="btn" onclick="go('gateway')">💎 Gateway</button>
+          <button class="btn" onclick="go('settings')">⚡ Settings</button>
+        </div></div>
+      <div class="glass">
+        <h3 style="font-size:14px;font-weight:900;margin-bottom:16px">🤖 YOUR BOTS</h3>
+        <div class="grid" style="gap:10px;max-height:380px;overflow-y:auto">${botList}</div>
+      </div>
+    </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: CREATE BOT
+   ═══════════════════════════════════════════════════════════ */
+async function pgCreateBot(){
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">🚀 NEW DEPLOYMENT</div><h1>Create a Bot</h1><p>Deploy a premium Telegram bot using your BotFather token.</p></div>
+    <div class="glass" style="max-width:560px;padding:26px">
+      <div class="field"><label class="label">🤖 Bot Token (from @BotFather)</label><input class="input" id="botToken" placeholder="1234567890:ABC-DEF..." autocomplete="off" spellcheck="false"></div>
+      <div class="field"><label class="label">👤 Owner Telegram User ID</label><input class="input" id="botOwner" placeholder="e.g. 8917853732" inputmode="numeric"></div>
+      <div class="field"><label class="label">🏷️ Display Name</label><input class="input" id="botName" placeholder="My Premium Store"></div>
+      <div class="flex mt-2">
+        <button class="btn primary" onclick="deployBot()">🚀 DEPLOY</button>
+        <button class="btn" onclick="validateBot()">✅ VALIDATE</button>
+      </div>
+      <div id="deployResult" class="mt-2 sm"></div>
+    </div>`;
+}
+async function validateBot(){
+  const token=$('#botToken').value.trim(),ownerId=$('#botOwner').value.trim();
+  if(!token||!ownerId) return toast('Enter token and owner ID','err');
+  const r=$('#deployResult');r.innerHTML='<span class="muted">🔄 Validating...</span>';
+  try{
+    const d=await api('/api/bots/validate',{method:'POST',body:JSON.stringify({token,ownerId})});
+    r.innerHTML=`<span style="color:var(--success)">✅ Valid! Bot: @${esc(d.bot.username)}</span>`;
+    if(!$('#botName').value) $('#botName').value=d.bot.first_name||'';
+  }catch(e){r.innerHTML=`<span style="color:var(--danger)">❌ ${esc(e.message)}</span>`}
+}
+async function deployBot(){
+  const token=$('#botToken').value.trim(),ownerId=$('#botOwner').value.trim(),name=$('#botName').value.trim();
+  if(!token||!ownerId) return toast('Enter token and owner ID','err');
+  const r=$('#deployResult');r.innerHTML='<span class="muted">🚀 Deploying...</span>';
+  try{
+    const d=await api('/api/bots/deploy',{method:'POST',body:JSON.stringify({token,ownerId,name})});
+    r.innerHTML=`<span style="color:var(--success)">✅ Deployed! ID: ${d.bot.id}</span>`;
+    toast('Bot deployed!');await loadBots();botId=d.bot.id;
+    setTimeout(()=>go('dashboard'),800);
+  }catch(e){r.innerHTML=`<span style="color:var(--danger)">❌ ${esc(e.message)}</span>`;toast(e.message,'err')}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: PRODUCTS
+   ═══════════════════════════════════════════════════════════ */
+async function pgProducts(){
+  const d=await api(`/api/products/${botId}`);
+  const ps=d.products||[];
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">🛍️ STORE</div><h1>Manage Products</h1><p>Add and manage products with emoji and category.</p></div>
+    <div class="flex between mb-2">
+      <span class="muted sm">${ps.length} product${ps.length!==1?'s':''}</span>
+      <button class="btn primary" onclick="addProductModal()">＋ Add Product</button>
+    </div>
+    <div class="grid g3">
+      ${ps.length?ps.map(p=>`
+        <div class="glass">
+          <div class="flex between mb-2">
+            <div style="min-width:0">
+              <div style="font-weight:900;font-size:14px;margin-bottom:5px">${esc(p.emoji||'🛍️')} ${esc(p.name)}</div>
+              <div class="muted sm">${p.plan_count||0} plan(s) • ${p.stock||0} stock</div></div>
+            <span class="pill ${p.maintenance?'maint':(p.active?'ok':'off')}">${p.maintenance?'🚧 MAINT':(p.active?'ACTIVE':'DISABLED')}</span>
+          </div>
+          ${p.description?`<p class="muted sm mb-2" style="line-height:1.55">${esc(p.description).slice(0,120)}</p>`:''}
+          <div class="flex mt-2">
+            <button class="btn sm" onclick="showPlans(${p.id},'${esc(p.name)}')">📋 Plans</button>
+            <button class="btn sm" onclick="editProduct(${p.id})">✏️ Edit</button>
+            <button class="btn sm" onclick="toggleMaint(${p.id},${p.maintenance?1:0})">${p.maintenance?'🟢 LIVE':'🚧'}</button>
+            <button class="btn sm danger" onclick="delProduct(${p.id})">🗑️</button>
+          </div></div>
+      `).join(''):`<div class="glass center" style="grid-column:1/-1;padding:38px">
+        <div style="font-size:46px;margin-bottom:12px">🛍️</div>
+        <p class="muted mb-2">No products yet</p>
+        <button class="btn primary" onclick="addProductModal()">Add First Product</button></div>`}
+    </div>`;
+}
+function addProductModal(){
+  showModal(`
+    <div class="modal-top"><h3>🛍️ Add Product</h3><button class="x-btn" onclick="closeModal()">✕</button></div>
+    <div class="field-row">
+      <div class="field"><label class="label">Product Name</label><input class="input" id="pName" placeholder="NINE X PANEL"></div>
+      <div class="field"><label class="label">Emoji</label><input class="input" id="pEmoji" placeholder="🛠️"></div>
+    </div>
+    <div class="field"><label class="label">Category</label>
+      <select class="sel" id="pCat">
+        <option value="android_nonroot">🤖 ANDROID NON ROOT</option>
+        <option value="android_root">🔓 ANDROID ROOT</option>
+        <option value="iphone">🍎 iPHONE</option>
+      </select></div>
+    <div class="field"><label class="label">Channel Link (optional)</label><input class="input" id="pChannel" placeholder="https://t.me/yourchannel"></div>
+    <div class="field"><label class="label">Description</label><textarea class="ta" id="pDesc" placeholder="Optional..."></textarea></div>
+    <div id="plansBox"></div>
+    <button class="btn mt-2" onclick="addPlanRow()">＋ Add Plan</button>
+    <div class="flex between mt-2" style="margin-top:18px">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="saveProduct()">💾 Save Product</button>
+    </div>`);
+  addPlanRow();
+}
+function addPlanRow(){
+  const b=$('#plansBox');const i=b.children.length;
+  const d=document.createElement('div');
+  d.className='glass mt-2';d.style.padding='14px';
+  d.innerHTML=`
+    <div class="flex between mb-2"><span class="badge">Plan ${i+1}</span><button class="btn xs danger" onclick="this.closest('.glass').remove()">✕</button></div>
+    <div class="field-row">
+      <div class="field"><label class="label">Name</label><input class="input pln" placeholder="6 Hours"></div>
+      <div class="field"><label class="label">Days</label><input class="input pld" type="number" placeholder="1"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="label">Price ₹</label><input class="input plp" type="number" placeholder="50"></div>
+      <div class="field"><label class="label">Reseller ₹</label><input class="input plrp" type="number" placeholder="40"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="label">Remote ID</label><input class="input plrid" placeholder="PID_123"></div>
+      <div class="field"><label class="label">Remote Duration</label><input class="input plrd" placeholder="1 Day"></div>
+    </div>`;
+  b.appendChild(d);
+}
+async function saveProduct(){
+  const name=$('#pName').value.trim();
+  if(!name) return toast('Name required','err');
+  const plans=[];
+  $$('#plansBox .glass').forEach(c=>{
+    const n=c.querySelector('.pln').value.trim();if(!n) return;
+    plans.push({
+      name:n,days:parseInt(c.querySelector('.pld').value)||0,
+      price:parseFloat(c.querySelector('.plp').value)||0,
+      reseller_price:parseFloat(c.querySelector('.plrp').value)||0,
+      remote_id:c.querySelector('.plrid').value.trim(),
+      remote_duration:c.querySelector('.plrd').value.trim(),
+    });
+  });
+  try{
+    await api(`/api/products/${botId}`,{method:'POST',body:JSON.stringify({
+      name,emoji:$('#pEmoji').value.trim(),category_key:$('#pCat').value,
+      description:$('#pDesc').value.trim(),channel_link:$('#pChannel').value.trim(),plans
+    })});
+    closeModal();toast('Product added!');pgProducts();
+  }catch(e){toast(e.message,'err')}
+}
+async function delProduct(id){
+  if(!confirm('Delete this product?')) return;
+  try{await api(`/api/products/${botId}/${id}`,{method:'DELETE'});toast('Deleted');pgProducts()}catch(e){toast(e.message,'err')}
+}
+async function toggleMaint(id,cur){
+  try{await api(`/api/products/${botId}/${id}/maintenance`,{method:'POST',body:JSON.stringify({enabled:!cur})});toast(cur?'Product is live':'Under maintenance');pgProducts()}catch(e){toast(e.message,'err')}
+}
+async function editProduct(id){
+  const d=await api(`/api/products/${botId}`);
+  const p=(d.products||[]).find(x=>x.id===id);
+  if(!p) return toast('Not found','err');
+  const cat=p.category_key||'android_nonroot';
+  showModal(`
+    <div class="modal-top"><h3>✏️ Edit Product</h3><button class="x-btn" onclick="closeModal()">✕</button></div>
+    <div class="field-row">
+      <div class="field"><label class="label">Name</label><input class="input" id="epName" value="${esc(p.name)}"></div>
+      <div class="field"><label class="label">Emoji</label><input class="input" id="epEmoji" value="${esc(p.emoji||'')}"></div></div>
+    <div class="field"><label class="label">Category</label>
+      <select class="sel" id="epCat">
+        <option value="android_nonroot" ${cat==='android_nonroot'?'selected':''}>🤖 ANDROID NON ROOT</option>
+        <option value="android_root" ${cat==='android_root'?'selected':''}>🔓 ANDROID ROOT</option>
+        <option value="iphone" ${cat==='iphone'?'selected':''}>🍎 iPHONE</option>
+      </select></div>
+    <div class="field"><label class="label">Channel Link</label><input class="input" id="epChannel" value="${esc(p.channel_link||'')}"></div>
+    <div class="field"><label class="label">Description</label><textarea class="ta" id="epDesc">${esc(p.description||'')}</textarea></div>
+    <div class="flex between mt-2" style="margin-top:18px">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="saveEditProduct(${id})">💾 Save</button>
+    </div>`);
+}
+async function saveEditProduct(id){
+  try{
+    await api(`/api/products/${botId}/${id}`,{method:'PUT',body:JSON.stringify({
+      name:$('#epName').value.trim(),emoji:$('#epEmoji').value.trim(),
+      category_key:$('#epCat').value,channel_link:$('#epChannel').value.trim(),
+      description:$('#epDesc').value.trim()
+    })});
+    closeModal();toast('Updated');pgProducts();
+  }catch(e){toast(e.message,'err')}
+}
+async function showPlans(productId,name){
+  try{
+    const d=await api(`/api/plans/${productId}?bot_id=${botId}`);
+    const ps=d.plans||[];
+    showModal(`
+      <div class="modal-top"><h3>📋 Plans — ${esc(name)}</h3><button class="x-btn" onclick="closeModal()">✕</button></div>
+      ${ps.length?ps.map(p=>`
+        <div class="glass mb-2" style="padding:14px">
+          <div class="flex between mb-2">
+            <div><b>${esc(p.name)}</b><div class="muted sm">${p.days||0} days • ₹${p.customer_price||0} • Reseller ₹${p.reseller_price||0}</div></div>
+            <span class="pill ${p.active?'ok':'off'}">${p.active?'ACTIVE':'OFF'}</span>
+          </div>
+          ${p.remote_id?`<div class="dim sm">Remote: ${esc(p.remote_id)} • ${esc(p.remote_duration||'')}</div>`:''}
+          <div class="flex mt-2">
+            <button class="btn xs" onclick="editPlan(${p.id},${productId})">✏️ Edit</button>
+            <button class="btn xs danger" onclick="delPlan(${p.id},${productId},'${esc(name)}')">🗑️ Delete</button>
+          </div></div>
+      `).join(''):'<p class="muted">No plans yet</p>'}`);
+  }catch(e){toast(e.message,'err')}
+}
+async function editPlan(planId,productId){
+  const d=await api(`/api/plans/${productId}?bot_id=${botId}`);
+  const p=(d.plans||[]).find(x=>x.id===planId);
+  if(!p) return toast('Not found','err');
+  showModal(`
+    <div class="modal-top"><h3>✏️ Edit Plan</h3><button class="x-btn" onclick="closeModal()">✕</button></div>
+    <div class="field"><label class="label">Name</label><input class="input" id="epnName" value="${esc(p.name)}"></div>
+    <div class="field-row">
+      <div class="field"><label class="label">Days</label><input class="input" id="epnDays" type="number" value="${p.days}"></div>
+      <div class="field"><label class="label">Price ₹</label><input class="input" id="epnPrice" type="number" value="${p.customer_price}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="label">Reseller ₹</label><input class="input" id="epnRPrice" type="number" value="${p.reseller_price}"></div>
+      <div class="field"><label class="label">Active</label><select class="sel" id="epnAct"><option value="1" ${p.active?'selected':''}>Yes</option><option value="0" ${!p.active?'selected':''}>No</option></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="label">Remote ID</label><input class="input" id="epnRid" value="${esc(p.remote_id||'')}"></div>
+      <div class="field"><label class="label">Remote Duration</label><input class="input" id="epnRd" value="${esc(p.remote_duration||'')}"></div>
+    </div>
+    <div class="flex between mt-2" style="margin-top:18px">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="saveEditPlan(${planId},${productId})">💾 Save</button>
+    </div>`);
+}
+async function saveEditPlan(planId,productId){
+  try{
+    await api(`/api/plans/${botId}/${planId}`,{method:'PUT',body:JSON.stringify({
+      name:$('#epnName').value.trim(),days:parseInt($('#epnDays').value)||0,
+      price:parseFloat($('#epnPrice').value)||0,
+      reseller_price:parseFloat($('#epnRPrice').value)||0,
+      remote_id:$('#epnRid').value.trim(),
+      remote_duration:$('#epnRd').value.trim(),
+      active:Number($('#epnAct').value)
+    })});
+    closeModal();toast('Plan updated');
+  }catch(e){toast(e.message,'err')}
+}
+async function delPlan(planId,productId,name){
+  if(!confirm('Delete this plan?')) return;
+  try{await api(`/api/plans/${botId}/${planId}`,{method:'DELETE'});toast('Plan deleted');showPlans(productId,name)}catch(e){toast(e.message,'err')}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: DISPLAY TEXT
+   ═══════════════════════════════════════════════════════════ */
+async function pgDisplayText(){
+  let cfg={};
+  try{const d=await api(`/api/config/${botId}`);(d.settings||[]).forEach(s=>{cfg[s.key]=s.value})}catch{}
+  const d2=await api(`/api/products/${botId}`);
+  const ps=d2.products||[];
+  const F=(k,d='')=>cfg[k]||d;
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">✏️ CUSTOMIZATION</div><h1>Display Text</h1><p>Set custom headers and text that appear inside your bot.</p></div>
+    <div class="glass mb-3">
+      <h3 style="font-size:14px;font-weight:900;margin-bottom:16px">📂 CATEGORY HEADERS</h3>
+      <div style="padding:16px;background:rgba(0,0,0,.28);border-radius:12px;margin-bottom:12px">
+        <b style="color:var(--aurora-teal)">🤖 Android Non Root</b>
+        <div class="field-row mt-2">
+          <div class="field"><label class="label">Header</label><input class="input" id="dt_anr_h" value="${esc(F('category_android_nonroot_header','ANDROID NON ROOT — SELECT A PRODUCT'))}"></div>
+          <div class="field"><label class="label">Sub Text</label><input class="input" id="dt_anr_s" value="${esc(F('category_android_nonroot_sub','Choose any product below'))}"></div>
+        </div></div>
+      <div style="padding:16px;background:rgba(0,0,0,.28);border-radius:12px;margin-bottom:12px">
+        <b style="color:var(--aurora-teal)">🔓 Android Root</b>
+        <div class="field-row mt-2">
+          <div class="field"><label class="label">Header</label><input class="input" id="dt_ar_h" value="${esc(F('category_android_root_header','ANDROID ROOT — SELECT A PRODUCT'))}"></div>
+          <div class="field"><label class="label">Sub Text</label><input class="input" id="dt_ar_s" value="${esc(F('category_android_root_sub','Choose any product below'))}"></div>
+        </div></div>
+      <div style="padding:16px;background:rgba(0,0,0,.28);border-radius:12px">
+        <b style="color:var(--aurora-teal)">🍎 iPhone</b>
+        <div class="field-row mt-2">
+          <div class="field"><label class="label">Header</label><input class="input" id="dt_ip_h" value="${esc(F('category_iphone_header','iPHONE — SELECT A PRODUCT'))}"></div>
+          <div class="field"><label class="label">Sub Text</label><input class="input" id="dt_ip_s" value="${esc(F('category_iphone_sub','Choose any product below'))}"></div>
+        </div></div>
+    </div>
+    <div class="glass mb-3">
+      <h3 style="font-size:14px;font-weight:900;margin-bottom:16px">🛍️ PRODUCT HEADERS</h3>
+      ${ps.length?ps.map(p=>`
+        <div style="padding:16px;background:rgba(0,0,0,.28);border-radius:12px;margin-bottom:12px">
+          <b style="color:var(--aurora-violet)">${esc(p.emoji||'🛍️')} ${esc(p.name)}</b>
+          <div class="field-row mt-2">
+            <div class="field"><label class="label">Header Text</label><input class="input prod-h" data-id="${p.id}" value="${esc(p.header_text||('PRODUCT: '+p.name))}"></div>
+            <div class="field"><label class="label">Sub Text</label><input class="input prod-s" data-id="${p.id}" value="${esc(p.sub_text||'👇 CHOOSE YOUR PLAN 👇')}"></div>
+          </div></div>
+      `).join(''):'<p class="muted">No products yet. Add products first.</p>'}
+    </div>
+    <button class="btn primary" onclick="saveDisplayText()">💾 SAVE ALL DISPLAY TEXT</button>`;
+}
+async function saveDisplayText(){
+  const cat={
+    category_android_nonroot_header:$('#dt_anr_h').value,
+    category_android_nonroot_sub:$('#dt_anr_s').value,
+    category_android_root_header:$('#dt_ar_h').value,
+    category_android_root_sub:$('#dt_ar_s').value,
+    category_iphone_header:$('#dt_ip_h').value,
+    category_iphone_sub:$('#dt_ip_s').value,
+  };
+  const prods=[];
+  $$('.prod-h').forEach(inp=>{
+    const id=inp.dataset.id;
+    const sub=document.querySelector(`.prod-s[data-id="${id}"]`);
+    prods.push({id:parseInt(id),header_text:inp.value,sub_text:sub?sub.value:''});
+  });
+  try{
+    await api(`/api/config/${botId}`,{method:'PUT',body:JSON.stringify(cat)});
+    if(prods.length) await api(`/api/display-text/${botId}`,{method:'PUT',body:JSON.stringify({products:prods})});
+    toast('Display text saved!');
+  }catch(e){toast(e.message,'err')}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: KEYS / ID STOCK
+   ═══════════════════════════════════════════════════════════ */
+async function pgKeys(){
+  const d=await api(`/api/keys/${botId}?type=key`);
+  const ks=d.keys||[];
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">🔑 STOCK</div><h1>License Keys</h1><p>Manage keys for your products.</p></div>
+    <div class="flex between mb-2">
+      <span class="muted sm">${ks.length} key${ks.length!==1?'s':''}</span>
+      <button class="btn primary" onclick="addStockModal('key')">＋ Add Keys</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Key</th><th>Product</th><th>Plan</th><th>Status</th><th>Added</th></tr></thead>
+      <tbody>${ks.length?ks.slice(0,200).map(k=>`
+        <tr><td><code>${esc((k.key_value||'').slice(0,40))}</code></td>
+        <td>${esc(k.product||'—')}</td><td>${esc(k.plan||'—')}</td>
+        <td><span class="pill ${k.status==='available'?'ok':'info'}">${esc(k.status)}</span></td>
+        <td class="muted sm">${fmt(k.created_at)}</td></tr>`).join(''):`<tr><td colspan="5" class="empty-cell">No keys yet</td></tr>`}</tbody>
+    </table></div>`;
+}
+async function pgIdStock(){
+  const d=await api(`/api/keys/${botId}?type=id`);
+  const ks=d.keys||[];
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">🆔 STOCK</div><h1>ID Stock</h1><p>ID-based stock (separate from license keys).</p></div>
+    <div class="flex between mb-2">
+      <span class="muted sm">${ks.length} ID${ks.length!==1?'s':''}</span>
+      <button class="btn primary" onclick="addStockModal('id')">＋ Add IDs</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>ID</th><th>Product</th><th>Plan</th><th>Status</th></tr></thead>
+      <tbody>${ks.length?ks.slice(0,200).map(k=>`
+        <tr><td><code>${esc((k.key_value||'').slice(0,40))}</code></td>
+        <td>${esc(k.product||'—')}</td><td>${esc(k.plan||'—')}</td>
+        <td><span class="pill ${k.status==='available'?'ok':'info'}">${esc(k.status)}</span></td></tr>`).join(''):`<tr><td colspan="4" class="empty-cell">No IDs yet</td></tr>`}</tbody>
+    </table></div>`;
+}
+async function addStockModal(type){
+  let opts='';
+  try{
+    const d=await api(`/api/products/${botId}`);
+    for(const p of (d.products||[])){
+      try{
+        const pd=await api(`/api/plans/${p.id}?bot_id=${botId}`);
+        (pd.plans||[]).forEach(pl=>{opts+=`<option value="${pl.id}">${esc(p.name)} → ${esc(pl.name)}</option>`});
+      }catch{}
+    }
+  }catch{}
+  showModal(`
+    <div class="modal-top"><h3>${type==='id'?'🆔 Add IDs':'🔑 Add Keys'}</h3><button class="x-btn" onclick="closeModal()">✕</button></div>
+    <div class="field"><label class="label">Select Plan</label><select class="sel" id="skPlan">${opts||'<option value="">No plans</option>'}</select></div>
+    <div class="field"><label class="label">${type==='id'?'IDs':'Keys'} (one per line)</label><textarea class="ta" id="skList" rows="8" placeholder="KEY-001&#10;KEY-002"></textarea></div>
+    <div class="flex between mt-2" style="margin-top:18px">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="saveStock('${type}')">💾 Add</button>
+    </div>`);
+}
+async function saveStock(type){
+  const pid=$('#skPlan').value,list=$('#skList').value;
+  if(!pid) return toast('Select a plan','err');
+  if(!list.trim()) return toast('Enter values','err');
+  try{
+    const d=await api(`/api/keys/${botId}/bulk`,{method:'POST',body:JSON.stringify({plan_id:parseInt(pid),keys:list,key_type:type})});
+    toast(`Added ${d.added||0} items`);closeModal();
+    go(type==='id'?'id-stock':'keys');
+  }catch(e){toast(e.message,'err')}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: PRODUCT LINKS
+   ═══════════════════════════════════════════════════════════ */
+async function pgProductLinks(){
+  const d=await api(`/api/product-links/${botId}`);
+  const ls=d.links||[];
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">🔗 LINKS</div><h1>Product Links</h1><p>Direct buy links to share with customers.</p></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Product</th><th>Status</th><th>Direct Link</th><th></th></tr></thead>
+      <tbody>${ls.length?ls.map(l=>`
+        <tr><td><b>${esc(l.name)}</b></td>
+        <td><span class="pill ${l.status==='Active'?'ok':(l.status==='Maintenance'?'maint':'off')}">${esc(l.status)}</span></td>
+        <td><code>${esc(l.link)}</code></td>
+        <td><button class="btn xs" onclick="copyTxt('${esc(l.link)}')">📋 Copy</button></td></tr>`).join(''):`<tr><td colspan="4" class="empty-cell">No products</td></tr>`}</tbody>
+    </table></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: COUPONS
+   ═══════════════════════════════════════════════════════════ */
+async function pgCoupons(){
+  const d=await api(`/api/coupons/${botId}`);
+  const cs=d.coupons||[];
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">🎟️ PROMOTIONS</div><h1>Coupons</h1><p>Create discount coupons for your customers.</p></div>
+    <div class="flex between mb-2">
+      <span class="muted sm">${cs.length} coupon${cs.length!==1?'s':''}</span>
+      <button class="btn primary" onclick="addCouponModal()">＋ Create Coupon</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Code</th><th>Discount</th><th>Used</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>${cs.length?cs.map(c=>`
+        <tr><td><code>${esc(c.code)}</code></td>
+        <td>${c.discount_type==='percent'?`${c.discount_value}%`:`₹${c.discount_value}`}${c.max_discount?` (max ₹${c.max_discount})`:''}</td>
+        <td>${c.used_count||0}${c.max_uses?` / ${c.max_uses}`:' / ∞'}</td>
+        <td class="muted sm">${esc(c.expires_at||'Never')}</td>
+        <td><span class="pill ${c.active?'ok':'off'}">${c.active?'ACTIVE':'OFF'}</span></td>
+        <td><button class="btn xs" onclick="toggleCoupon(${c.id},${c.active?0:1})">${c.active?'🚫':'✅'}</button>
+        <button class="btn xs danger" onclick="delCoupon(${c.id})">🗑️</button></td></tr>`).join(''):`<tr><td colspan="6" class="empty-cell">No coupons yet</td></tr>`}</tbody>
+    </table></div>`;
+}
+function addCouponModal(){
+  showModal(`
+    <div class="modal-top"><h3>🎟️ Create Coupon</h3><button class="x-btn" onclick="closeModal()">✕</button></div>
+    <div class="field-row">
+      <div class="field"><label class="label">Code</label><input class="input" id="cCode" placeholder="SAVE10"></div>
+      <div class="field"><label class="label">Type</label><select class="sel" id="cType"><option value="percent">Percent (%)</option><option value="fixed">Fixed (₹)</option></select></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="label">Value</label><input class="input" id="cValue" type="number" placeholder="10"></div>
+      <div class="field"><label class="label">Max Uses (0=∞)</label><input class="input" id="cMax" type="number" value="0"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="label">Min Order ₹</label><input class="input" id="cMin" type="number" value="0"></div>
+      <div class="field"><label class="label">Max Discount ₹</label><input class="input" id="cMaxD" type="number" value="0"></div>
+    </div>
+    <div class="field"><label class="label">Expiry (YYYY-MM-DD)</label><input class="input" id="cExp" placeholder="2026-12-31"></div>
+    <div class="flex between mt-2" style="margin-top:18px">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="saveCoupon()">💾 Create</button>
+    </div>`);
+}
+async function saveCoupon(){
+  const code=$('#cCode').value.trim().toUpperCase(),value=parseFloat($('#cValue').value)||0;
+  if(!code||!value) return toast('Code and value required','err');
+  try{
+    await api(`/api/coupons/${botId}`,{method:'POST',body:JSON.stringify({
+      code,discount_type:$('#cType').value,discount_value:value,
+      max_uses:parseInt($('#cMax').value)||0,max_uses_per_user:1,
+      min_order_amount:parseFloat($('#cMin').value)||0,
+      max_discount:parseFloat($('#cMaxD').value)||0,
+      expires_at:$('#cExp').value.trim()
+    })});
+    closeModal();toast('Coupon created');pgCoupons();
+  }catch(e){toast(e.message,'err')}
+}
+async function toggleCoupon(id,active){
+  try{await api(`/api/coupons/${botId}/${id}`,{method:'PUT',body:JSON.stringify({active})});toast('Updated');pgCoupons()}catch(e){toast(e.message,'err')}
+}
+async function delCoupon(id){
+  if(!confirm('Delete?')) return;
+  try{await api(`/api/coupons/${botId}/${id}`,{method:'DELETE'});toast('Deleted');pgCoupons()}catch(e){toast(e.message,'err')}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: PRODUCT ORDERS
+   ═══════════════════════════════════════════════════════════ */
+async function pgOrders(){
+  const d=await api(`/api/orders/${botId}`).catch(()=>({orders:[]}));
+  const os=d.orders||[];
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">📦 SALES</div><h1>Product Orders</h1><p>All product purchases from your customers.</p></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Order</th><th>User</th><th>Product</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>${os.length?os.map(o=>`
+        <tr><td><code>${esc(o.order_no||o.id)}</code></td>
+        <td>${esc(o.username||o.first_name||o.user_id||'—')}</td>
+        <td>${esc(o.product_name||'—')}<br><span class="muted sm">${esc(o.plan_name||'')}</span></td>
+        <td><b>${money(o.amount)}</b></td>
+        <td><span class="pill ${o.status==='approved'?'ok':(o.status==='pending'?'pend':'off')}">${esc(o.status||'—')}</span></td>
+        <td class="muted sm">${fmt(o.created_at)}</td></tr>`).join(''):`<tr><td colspan="6" class="empty-cell">No product orders yet</td></tr>`}</tbody>
+    </table></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: PENDING ORDERS (Admin control)
+   ═══════════════════════════════════════════════════════════ */
+async function pgPendingOrders(){
+  const d=await api(`/api/orders/${botId}`).catch(()=>({orders:[]}));
+  const os=(d.orders||[]).filter(o=>['pending','payment_verified_stock_unavailable','awaiting_utr'].includes(o.status));
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">⏳ ADMIN</div><h1>Pending Orders</h1><p>Stuck orders — Force Deliver or Cancel manually.</p></div>
+    <div class="flex between mb-2">
+      <span class="muted sm">${os.length} stuck order${os.length!==1?'s':''}</span>
+      <button class="btn" onclick="pgPendingOrders()">🔄 Refresh</button>
+    </div>
+    ${os.length?os.map(o=>`
+      <div class="glass mb-2">
+        <div class="flex between mb-2">
+          <div>
+            <div style="font-weight:900;font-size:13.5px;margin-bottom:4px">🧾 ${esc(o.order_no)}</div>
+            <div class="muted sm">${esc(o.product_name||'—')} → ${esc(o.plan_name||'—')}</div>
+          </div>
+          <span class="pill ${o.status==='pending'?'pend':'warn'}">${esc(o.status)}</span>
+        </div>
+        <div class="flex" style="gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:12px">
+          <span>👤 ${esc(o.username||o.first_name||o.user_id)}</span>
+          <span>💰 <b style="color:var(--aurora-teal)">${money(o.amount)}</b></span>
+          <span>📅 ${fmt(o.created_at)}</span>
+          ${o.fg_order_id?`<span>🔗 <code>${esc(o.fg_order_id)}</code></span>`:''}
+          ${o.utr?`<span>📝 UTR: <code>${esc(o.utr)}</code></span>`:''}
+        </div>
+        <div class="flex">
+          <button class="btn sm success" onclick="forceDeliver(${o.id})">✅ Force Deliver</button>
+          <button class="btn sm" onclick="forceDeliverWithKey(${o.id})">🔑 Add Key & Deliver</button>
+          <button class="btn sm" onclick="recheckOrder(${o.id})">🔄 Recheck Payment</button>
+          <button class="btn sm danger" onclick="cancelOrder(${o.id})">❌ Cancel</button>
+        </div>
+      </div>
+    `).join(''):`<div class="glass center" style="padding:38px">
+      <div style="font-size:46px;margin-bottom:12px">✨</div>
+      <p class="muted">No pending orders. Everything is fine.</p>
+    </div>`}`;
+}
+async function forceDeliver(orderId){
+  if(!confirm('Force-deliver this order? Bot will send key to user.')) return;
+  try{
+    const d=await api(`/api/orders/${botId}/${orderId}/force-deliver`,{method:'POST',body:JSON.stringify({})});
+    toast(d.message||'Delivered!');
+    setTimeout(pgPendingOrders,800);
+  }catch(e){toast(e.message,'err')}
+}
+function forceDeliverWithKey(orderId){
+  showModal(`
+    <div class="modal-top"><h3>🔑 Force Deliver</h3><button class="x-btn" onclick="closeModal()">✕</button></div>
+    <p class="muted mb-2">Order #${orderId} — manually provide a key.</p>
+    <div class="field"><label class="label">License Key</label><textarea class="ta" id="fdKey" placeholder="Paste the license key here..."></textarea></div>
+    <div class="flex between mt-2" style="margin-top:16px">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="doForceDeliverWithKey(${orderId})">🚀 Deliver Now</button>
+    </div>`);
+}
+async function doForceDeliverWithKey(orderId){
+  const key=$('#fdKey').value.trim();
+  if(!key) return toast('Enter the key','err');
+  try{
+    const d=await api(`/api/orders/${botId}/${orderId}/force-deliver`,{method:'POST',body:JSON.stringify({key})});
+    toast(d.message||'Delivered!');closeModal();
+    setTimeout(pgPendingOrders,800);
+  }catch(e){toast(e.message,'err')}
+}
+async function cancelOrder(orderId){
+  if(!confirm('Cancel this order?')) return;
+  try{
+    await api(`/api/orders/${botId}/${orderId}/cancel`,{method:'POST',body:JSON.stringify({reason:'Cancelled by admin'})});
+    toast('Order cancelled');setTimeout(pgPendingOrders,500);
+  }catch(e){toast(e.message,'err')}
+}
+async function recheckOrder(orderId){
+  toast('Rechecking via FamGateway...');
+  try{
+    const d=await api(`/api/orders/${botId}`);
+    const o=(d.orders||[]).find(x=>x.id===orderId);
+    if(!o) return toast('Order not found','err');
+    toast('Bot will auto-verify in 20s. Check Pending Orders again.');
+  }catch(e){toast(e.message,'err')}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: TOP-UPS
+   ═══════════════════════════════════════════════════════════ */
+async function pgTopups(){
+  const d=await api(`/api/payments/${botId}`).catch(()=>({payments:[]}));
+  const os=d.payments||[];
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">💳 WALLET</div><h1>Top-ups</h1><p>Wallet deposit requests from your users.</p></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>User</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>${os.length?os.map(o=>`
+        <tr><td>${esc(o.username||o.first_name||o.user_id)}</td>
+        <td><b>${money(o.amount||o.topup_amount)}</b></td>
+        <td><span class="pill ${o.status==='approved'?'ok':(o.status==='pending'?'pend':'off')}">${esc(o.status)}</span></td>
+        <td class="muted sm">${fmt(o.created_at)}</td></tr>`).join(''):`<tr><td colspan="4" class="empty-cell">No top-ups yet</td></tr>`}</tbody>
+    </table></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: DELIVERY LOGS
+   ═══════════════════════════════════════════════════════════ */
+async function pgDeliveryLogs(){
+  const search=$('#dlSearch')?.value||'';
+  const d=await api(`/api/delivery-logs/${botId}?search=${encodeURIComponent(search)}`);
+  const ls=d.logs||[];
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">📜 HISTORY</div><h1>Delivery Logs</h1><p>Track every delivered key.</p></div>
+    <div class="glass mb-2" style="padding:12px">
+      <input class="input" id="dlSearch" placeholder="🔍 Search user, product, or key..." value="${esc(search)}" oninput="pgDeliveryLogs()">
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>User</th><th>Product / Plan</th><th>Amount</th><th>Key</th><th>Date</th></tr></thead>
+      <tbody>${ls.length?ls.map(l=>`
+        <tr><td>${esc(l.username||l.first_name||l.user_id)}</td>
+        <td>${esc(l.product_name||'—')}<br><span class="muted sm">${esc(l.plan_name||'')}</span></td>
+        <td>${money(l.amount)}</td>
+        <td><code>${esc((l.delivered_key||'—').slice(0,30))}</code></td>
+        <td class="muted sm">${fmt(l.created_at)}</td></tr>`).join(''):`<tr><td colspan="5" class="empty-cell">No delivery logs</td></tr>`}</tbody>
+    </table></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: MEMBERS (with Make Reseller button)
+   ═══════════════════════════════════════════════════════════ */
+async function pgMembers(){
+  const d=await api(`/api/users/${botId}`);
+  const us=d.users||[];
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">👥 COMMUNITY</div><h1>Members</h1><p>All customers in your store.</p></div>
+    <div class="flex between mb-2"><span class="muted sm">${us.length} member${us.length!==1?'s':''}</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>User</th><th>ID</th><th>Balance</th><th>Orders</th><th>Type</th><th>Actions</th></tr></thead>
+      <tbody>${us.length?us.slice(0,300).map(u=>`
+        <tr>
+          <td><b>${esc(u.first_name||u.username||'User')}</b></td>
+          <td><code>${esc(u.id)}</code></td>
+          <td>${money(u.balance)}</td>
+          <td>${u.orders_count||0}</td>
+          <td>${u.is_reseller?'<span class="pill ok">🏪 RESELLER</span>':'<span class="pill info">👤 USER</span>'}</td>
+          <td>
+            <button class="btn xs" onclick="adjustBalance('${esc(u.id)}','${esc(u.first_name||u.username||'User')}')">💰</button>
+            <button class="btn xs ${u.is_reseller?'danger':'success'}" onclick="toggleReseller('${esc(u.id)}',${u.is_reseller?0:1},'${esc(u.first_name||u.username||'User')}')">
+              ${u.is_reseller?'❌ Remove':'🏪 Make Reseller'}
+            </button>
+          </td>
+        </tr>`).join(''):`<tr><td colspan="6" class="empty-cell">No members yet</td></tr>`}</tbody>
+    </table></div>`;
+}
+function adjustBalance(userId,name){
+  showModal(`
+    <div class="modal-top"><h3>💰 Adjust Balance</h3><button class="x-btn" onclick="closeModal()">✕</button></div>
+    <p class="muted mb-2">User: <b style="color:var(--aurora-teal)">${esc(name)}</b> (ID: ${esc(userId)})</p>
+    <div class="field"><label class="label">Amount (use negative to debit)</label><input class="input" id="adjAmt" placeholder="+50 or -20"></div>
+    <div class="field"><label class="label">Reason</label><input class="input" id="adjReason" placeholder="Admin adjustment"></div>
+    <div class="flex between mt-2" style="margin-top:16px">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="doAdjust('${esc(userId)}')">💾 Apply</button>
+    </div>`);
+}
+async function doAdjust(userId){
+  const amt=parseFloat($('#adjAmt').value)||0;
+  if(!amt) return toast('Enter amount','err');
+  try{
+    await api(`/api/wallet/${botId}`,{method:'POST',body:JSON.stringify({
+      user_id:userId,amount:amt,reason:$('#adjReason').value.trim()||'Admin adjustment'
+    })});
+    closeModal();toast('Balance updated');pgMembers();
+  }catch(e){toast(e.message,'err')}
+}
+async function toggleReseller(userId,makeReseller,name){
+  const action=makeReseller?'make reseller':'remove reseller';
+  if(!confirm(`${action} ${name}?`)) return;
+  try{
+    await api(`/api/resellers/${botId}`,{method:'POST',body:JSON.stringify({
+      user_id:Number(userId), is_reseller: makeReseller
+    })});
+    toast(makeReseller?'User is now a reseller!':'Reseller removed');
+    pgMembers();
+  }catch(e){toast(e.message,'err')}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: RESELLERS
+   ═══════════════════════════════════════════════════════════ */
+async function pgResellers(){
+  const d=await api(`/api/resellers/${botId}`);
+  const rs=d.resellers||[],st=d.stats||{};
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">🏪 PARTNERS</div><h1>Resellers</h1><p>Manage reseller accounts and stats.</p></div>
+    <div class="grid g4 mb-2">
+      <div class="glass stat"><div class="ico">🏪</div><div class="lbl">Total</div><div class="val">${st.total||0}</div></div>
+      <div class="glass stat v4"><div class="ico">💰</div><div class="lbl">Balance</div><div class="val">${money(st.total_balance)}</div></div>
+      <div class="glass stat"><div class="ico">📥</div><div class="lbl">Today Deposit</div><div class="val">${money(st.deposited_today)}</div></div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>User</th><th>Balance</th><th>Deposited Today</th><th>Actions</th></tr></thead>
+      <tbody>${rs.length?rs.map(r=>`
+        <tr><td><b>${esc(r.first_name||r.username||r.id)}</b></td>
+        <td>${money(r.balance)}</td><td>${money(r.deposited_today)}</td>
+        <td><button class="btn xs danger" onclick="toggleReseller('${r.id}',0,'${esc(r.first_name||r.username||'User')}')">❌ Remove</button></td></tr>`).join(''):`<tr><td colspan="4" class="empty-cell">No resellers yet</td></tr>`}</tbody>
+    </table></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: BROADCAST (with media preview)
+   ═══════════════════════════════════════════════════════════ */
+async function pgBroadcast(){
+  const d=await api(`/api/broadcasts/${botId}`);
+  const ls=d.broadcasts||[];
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">📢 REACH</div><h1>Broadcast</h1><p>Send messages to all your users — text, photo, video, audio supported.</p></div>
+    <div class="glass mb-3">
+      <div class="field"><label class="label">Message</label><textarea class="ta" id="bcText" rows="5" placeholder="Type your message..."></textarea></div>
+      <div class="field">
+        <label class="label">Media URL (optional — auto-detects type)</label>
+        <input class="input" id="bcMedia" placeholder="https://example.com/photo.jpg" oninput="previewMedia(this.value)">
+        <div id="mediaPreviewBox"></div>
+      </div>
+      <div class="flex"><button class="btn primary" onclick="sendBroadcast()">📤 SEND BROADCAST</button></div>
+    </div>
+    <div class="glass">
+      <h3 style="font-size:14px;font-weight:900;margin-bottom:14px">📋 HISTORY</h3>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Message</th><th>Type</th><th>Sent</th><th>Date</th></tr></thead>
+        <tbody>${ls.length?ls.map(b=>`
+          <tr><td>${esc((b.message||b.text||'').slice(0,60))}</td>
+          <td><span class="pill info">${esc(b.media_type||'text')}</span></td>
+          <td>${b.sent_count||0}</td>
+          <td class="muted sm">${fmt(b.created_at)}</td></tr>`).join(''):`<tr><td colspan="4" class="empty-cell">No broadcasts yet</td></tr>`}</tbody>
+      </table></div>
+    </div>`;
+}
+function previewMedia(url){
+  const box=$('#mediaPreviewBox');
+  if(!url || !url.trim()){box.innerHTML='';return}
+  const u=url.toLowerCase().split('?')[0];
+  let type='text', ico='📄', name='Link';
+  if(/\.(jpg|jpeg|png|gif|webp)$/.test(u)){type='photo';ico='🖼️';name='Photo'}
+  else if(/\.(mp4|mov|mkv|webm|avi)$/.test(u)){type='video';ico='🎬';name='Video'}
+  else if(/\.(mp3|m4a|ogg|wav|opus)$/.test(u)){type='audio';ico='🎵';name='Audio'}
+  else if(/\.(pdf|zip|apk|doc|docx)$/.test(u)){type='document';ico='📄';name='Document'}
+  box.innerHTML=`<div class="media-preview">
+    <div class="ico">${ico}</div>
+    <div class="info"><b>Detected: ${name}</b><span>${esc(url.slice(0,80))}</span></div>
+  </div>`;
+}
+async function sendBroadcast(){
+  const text=$('#bcText').value.trim();
+  if(!text) return toast('Enter a message','err');
+  try{
+    await api(`/api/broadcast/${botId}`,{method:'POST',body:JSON.stringify({
+      text,
+      media_url:$('#bcMedia').value.trim(),
+      media_type:''
+    })});
+    toast('Broadcast queued!');$('#bcText').value='';$('#bcMedia').value='';$('#mediaPreviewBox').innerHTML='';
+    pgBroadcast();
+  }catch(e){toast(e.message,'err')}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: FAMGATEWAY
+   ═══════════════════════════════════════════════════════════ */
+async function pgGateway(){
+  let cfg={};
+  try{const d=await api(`/api/config/${botId}`);(d.settings||[]).forEach(s=>{cfg[s.key]=s.value})}catch{}
+  const webhookUrl=`${window.location.origin}/api/famgateway/webhook/${botId}`;
+  const apiKeyVal=cfg.payment_gateway_api_key||'';
+  const isEnabled=cfg.payment_gateway_enabled!=='0';
+  const upiId=cfg.payment_upi_id||'paytm.s1dw5n0@pty';
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">💎 PAYMENT GATEWAY</div><h1>FamGateway Integration</h1><p>Real-time UPI payment gateway with automatic verification.</p></div>
+    <div class="grid g2" style="gap:18px">
+      <div class="glass" style="padding:24px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+          <div style="width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#4db8ff,#9d7bff);display:grid;place-items:center;font-size:20px;box-shadow:0 8px 24px rgba(77,184,255,.35);font-weight:900;color:#0a0816">F</div>
+          <div><div style="font-weight:900;font-size:15px">FamGateway</div><div class="muted sm">Zero-fee P2P UPI gateway</div></div>
+        </div>
+        <div class="field">
+          <label class="label">🔐 API Key</label>
+          <div style="position:relative">
+            <input class="input" id="fgApiKey" type="password" value="${esc(apiKeyVal)}" placeholder="Your FamGateway API Key" autocomplete="off" spellcheck="false" style="padding-right:46px">
+            <button type="button" onclick="toggleKeyVis()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px" id="fgKeyEye">👁️</button>
+          </div>
+          <div class="muted sm" style="margin-top:6px">Dashboard → API Section में मिलेगी।</div>
+        </div>
+        <div class="field">
+          <label class="label">💰 UPI ID (Receiver)</label>
+          <input class="input" id="fgUpiId" value="${esc(upiId)}" placeholder="yourname@fam">
+        </div>
+        <div class="field">
+          <label class="label">⚡ Gateway Status</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn ${isEnabled?'primary':'ghost'}" onclick="setGwEnabled('1')" id="gwOnBtn" style="flex:1">✅ Enabled</button>
+            <button class="btn ${!isEnabled?'danger':'ghost'}" onclick="setGwEnabled('0')" id="gwOffBtn" style="flex:1">⛔ Disabled</button>
+          </div>
+          <input type="hidden" id="fgEnabled" value="${isEnabled?'1':'0'}">
+        </div>
+        <div class="flex" style="gap:8px;margin-top:18px;flex-wrap:wrap">
+          <button class="btn primary" onclick="saveGatewaySettings()" id="fgSaveBtn">💾 Save</button>
+          <button class="btn" onclick="testGatewayConnection()" id="fgTestBtn">🔌 Test Connection</button>
+        </div>
+        <div id="fgTestResult" class="mt-2" style="margin-top:14px"></div>
+      </div>
+      <div class="glass" style="padding:24px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+          <div style="width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#2ff5c8,#4db8ff);display:grid;place-items:center;font-size:18px;box-shadow:0 8px 24px rgba(47,245,200,.35)">🔗</div>
+          <div><div style="font-weight:900;font-size:15px">Webhook Endpoint</div><div class="muted sm">Real-time payment notifications</div></div>
+        </div>
+        <div class="field">
+          <label class="label">📋 Webhook URL (FamGateway dashboard में paste करें)</label>
+          <div style="position:relative">
+            <textarea class="ta" readonly style="font-family:'JetBrains Mono',monospace;font-size:11px;min-height:70px;padding-right:48px" id="fgWebhookUrl">${esc(webhookUrl)}</textarea>
+            <button type="button" onclick="copyWebhookUrl()" style="position:absolute;right:8px;top:8px;background:rgba(47,245,200,.15);border:1px solid rgba(47,245,200,.35);color:var(--aurora-teal);padding:5px 9px;border-radius:7px;cursor:pointer;font-size:10.5px;font-weight:800">📋 Copy</button>
+          </div>
+        </div>
+        <div style="background:rgba(77,184,255,.08);border:1px solid rgba(77,184,255,.25);border-radius:12px;padding:14px;margin-top:12px">
+          <div style="font-weight:800;font-size:12px;margin-bottom:8px;color:var(--aurora-blue)">📌 Setup Steps:</div>
+          <ol style="padding-left:18px;font-size:11.5px;line-height:1.7;color:var(--muted)">
+            <li>FamGateway dashboard → <b>Webhook Endpoints</b></li>
+            <li>Name: <code>Shivam Bot ${botId}</code></li>
+            <li>URL: ऊपर वाला paste करें</li>
+            <li>Add Webhook Endpoint</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="flex between mt-2 mb-2">
+      <h3 style="font-size:14px;font-weight:900;margin-top:20px">🔍 Recent Gateway Activity</h3>
+      <button class="btn sm" onclick="loadGatewayLogs()">🔄 Refresh Logs</button>
+    </div>
+    <div id="gatewayLogs" class="glass" style="padding:18px">
+      <p class="muted sm">Click "Refresh Logs" to load recent gateway activity.</p>
+    </div>`;
+}
+function toggleKeyVis(){
+  const inp=$('#fgApiKey'),eye=$('#fgKeyEye');
+  if(!inp) return;
+  if(inp.type==='password'){inp.type='text';eye.textContent='🙈'}
+  else{inp.type='password';eye.textContent='👁️'}
+}
+function setGwEnabled(val){
+  const hidden=$('#fgEnabled');
+  if(hidden) hidden.value=val;
+  const onBtn=$('#gwOnBtn'),offBtn=$('#gwOffBtn');
+  if(val==='1'){
+    onBtn.className='btn primary';onBtn.style.flex='1';
+    offBtn.className='btn ghost';offBtn.style.flex='1';
+  }else{
+    onBtn.className='btn ghost';onBtn.style.flex='1';
+    offBtn.className='btn danger';offBtn.style.flex='1';
+  }
+}
+function copyWebhookUrl(){
+  const ta=$('#fgWebhookUrl');
+  if(ta) copyTxt(ta.value);
+}
+async function saveGatewaySettings(){
+  const btn=$('#fgSaveBtn');
+  const key=($('#fgApiKey')?.value||'').trim();
+  const upi=($('#fgUpiId')?.value||'').trim();
+  const enabled=($('#fgEnabled')?.value||'0');
+  if(key && key.length<10) return toast('API key too short','err');
+  if(upi && !upi.includes('@')) return toast('Invalid UPI ID format','err');
+  btn.disabled=true;btn.textContent='💾 Saving...';
+  try{
+    await api(`/api/config/${botId}`,{method:'PUT',body:JSON.stringify({
+      payment_gateway_api_key:key,
+      payment_upi_id:upi,
+      payment_gateway_enabled:enabled,
+      payment_gateway_provider:'famgateway'
+    })});
+    toast('✅ Gateway settings saved!');
+  }catch(e){toast(e.message,'err')}
+  finally{btn.disabled=false;btn.textContent='💾 Save'}
+}
+async function testGatewayConnection(){
+  const btn=$('#fgTestBtn'),res=$('#fgTestResult');
+  const key=($('#fgApiKey')?.value||'').trim();
+  if(!key){
+    res.innerHTML=`<div style="padding:12px;background:rgba(255,77,122,.1);border:1px solid rgba(255,77,122,.3);border-radius:11px;color:#ff7d9e;font-weight:700;font-size:12.5px">❌ पहले API key enter करें</div>`;
+    return;
+  }
+  btn.disabled=true;btn.textContent='🔌 Testing...';
+  res.innerHTML=`<div style="padding:12px;background:rgba(77,184,255,.08);border:1px solid rgba(77,184,255,.25);border-radius:11px;color:var(--aurora-blue);font-weight:700;font-size:12.5px">⏳ Testing... (₹1 test order)</div>`;
+  try{
+    await api(`/api/config/${botId}`,{method:'PUT',body:JSON.stringify({payment_gateway_api_key:key})});
+    const d=await api(`/api/gateway/test/${botId}`,{method:'POST'});
+    if(d.ok){
+      res.innerHTML=`<div style="padding:14px;background:rgba(47,245,200,.1);border:1px solid rgba(47,245,200,.35);border-radius:11px">
+        <div style="color:var(--success);font-weight:900;font-size:13.5px;margin-bottom:5px">✅ Connected!</div>
+        <div style="color:var(--muted);font-size:12px;line-height:1.6">${esc(d.message||'FamGateway reachable')}</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--dim)">Order: <code>${esc(d.test_order_id||'')}</code></div>
+      </div>`;
+      toast('Gateway connected!');
+    } else {
+      res.innerHTML=`<div style="padding:14px;background:rgba(255,77,122,.1);border:1px solid rgba(255,77,122,.35);border-radius:11px;color:#ff7d9e;font-weight:700;font-size:12.5px">❌ ${esc(d.message||'Failed')}</div>`;
+    }
+  }catch(e){
+    res.innerHTML=`<div style="padding:14px;background:rgba(255,77,122,.1);border:1px solid rgba(255,77,122,.35);border-radius:11px;color:#ff7d9e;font-weight:700;font-size:12.5px">❌ ${esc(e.message)}</div>`;
+  }finally{btn.disabled=false;btn.textContent='🔌 Test Connection'}
+}
+async function loadGatewayLogs(){
+  const box=$('#gatewayLogs');
+  box.innerHTML='<p class="muted sm">🔄 Loading...</p>';
+  try{
+    const d=await api(`/api/gateway/logs/${botId}`);
+    const logs=d.logs||[],orders=d.recent_orders||[];
+    let html='';
+    if(orders.length){
+      html+=`<h4 style="font-size:12.5px;font-weight:900;margin-bottom:10px">📦 Recent Orders</h4>
+      <div class="tbl-wrap" style="margin-bottom:14px"><table>
+        <thead><tr><th>Order</th><th>FG ID</th><th>Amount</th><th>Status</th><th>UTR</th><th>Date</th></tr></thead>
+        <tbody>${orders.map(o=>`<tr>
+          <td><code>${esc(o.order_no)}</code></td>
+          <td><code>${esc((o.fg_order_id||'').slice(0,20))}</code></td>
+          <td>${money(o.amount)}</td>
+          <td><span class="pill ${o.status==='approved'?'ok':(o.status==='pending'?'pend':'off')}">${esc(o.status)}</span></td>
+          <td><code>${esc(o.utr||'—')}</code></td>
+          <td class="muted sm">${fmt(o.created_at)}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>`;
+    }
+    if(logs.length){
+      html+=`<h4 style="font-size:12.5px;font-weight:900;margin-bottom:10px">🔧 Debug Logs</h4>`;
+      logs.forEach(l=>{
+        const v=String(l.value||'');
+        const parts=v.split('|');
+        html+=`<div style="padding:10px;background:rgba(0,0,0,.3);border-radius:9px;margin-bottom:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);word-break:break-all">
+          <div style="color:var(--aurora-teal);margin-bottom:4px">${esc(l.key)}</div>
+          <div>${esc(v.slice(0,300))}</div>
+        </div>`;
+      });
+    }
+    if(!html) html='<p class="muted sm">No logs yet. Place a test order to see activity.</p>';
+    box.innerHTML=html;
+  }catch(e){box.innerHTML=`<p class="muted sm">❌ ${esc(e.message)}</p>`}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: API SETUP
+   ═══════════════════════════════════════════════════════════ */
+async function pgApiSetup(){
+  let s={api_url:'',api_key:'',master_key:''};
+  try{const d=await api(`/api/bot/${botId}/api-settings`);s={...s,...(d.settings||{})}}catch{}
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">⚙️ INTEGRATION</div><h1>Key Delivery API</h1><p>Connect an external reseller API for auto-key delivery.</p></div>
+    <div class="glass" style="max-width:620px;padding:26px">
+      <div class="field"><label class="label">API URL</label><input class="input" id="apiUrl" value="${esc(s.api_url||'')}" placeholder="https://example.com/api/reseller.php"></div>
+      <div class="field"><label class="label">API Key</label><input class="input" id="apiKey" type="password" value="${esc(s.api_key||'')}" placeholder="Your API Key"></div>
+      <div class="field"><label class="label">Master Key (optional)</label><input class="input" id="masterKey" type="password" value="${esc(s.master_key||'')}" placeholder="Optional"></div>
+      <div class="flex">
+        <button class="btn primary" onclick="saveApiSetup()">💾 SAVE</button>
+        <button class="btn" onclick="testApiSetup()">🔌 TEST</button>
+      </div>
+      <div id="apiRes" class="mt-2 sm"></div>
+    </div>`;
+}
+async function saveApiSetup(){
+  try{
+    await api(`/api/bot/${botId}/api-settings`,{method:'PUT',body:JSON.stringify({
+      api_url:$('#apiUrl').value.trim(),api_key:$('#apiKey').value.trim(),master_key:$('#masterKey').value.trim()
+    })});
+    toast('API settings saved!');
+  }catch(e){toast(e.message,'err')}
+}
+async function testApiSetup(){
+  const r=$('#apiRes');r.innerHTML='<span class="muted">🔄 Testing...</span>';
+  try{
+    const d=await api(`/api/bot/${botId}/api-test`,{method:'POST'});
+    r.innerHTML=`<span style="color:var(--success)">✅ ${esc(d.message||'Connected!')}</span>`;
+  }catch(e){r.innerHTML=`<span style="color:var(--danger)">❌ ${esc(e.message)}</span>`}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: SETTINGS
+   ═══════════════════════════════════════════════════════════ */
+async function pgSettings(){
+  let c={};
+  try{const d=await api(`/api/config/${botId}`);(d.settings||[]).forEach(s=>{c[s.key]=s.value})}catch{}
+  const F=(k,d='')=>c[k]||d;
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">⚡ CONFIG</div><h1>Store Settings</h1><p>Branding, deposits, referrals, spin — everything in one place.</p></div>
+    <div class="glass mb-3">
+      <h3 style="font-size:14px;font-weight:900;margin-bottom:16px">🎨 BRANDING</h3>
+      <div class="field-row">
+        <div class="field"><label class="label">Shop Name</label><input class="input" id="s_store_name" value="${esc(F('store_name','SHIVAM STORE'))}"></div>
+        <div class="field"><label class="label">Tagline</label><input class="input" id="s_store_tagline" value="${esc(F('store_tagline',''))}"></div>
+      </div>
+      <div class="field"><label class="label">Announcement</label><textarea class="ta" id="s_store_announcement" rows="2">${esc(F('store_announcement',''))}</textarea></div>
+    </div>
+    <div class="glass mb-3">
+      <h3 style="font-size:14px;font-weight:900;margin-bottom:16px">🔗 LINKS</h3>
+      <div class="field-row">
+        <div class="field"><label class="label">How to Use</label><input class="input" id="s_link_how_to_use" value="${esc(F('link_how_to_use',''))}" placeholder="https://t.me/tutorial"></div>
+        <div class="field"><label class="label">Download Files</label><input class="input" id="s_link_download_files" value="${esc(F('link_download_files',''))}" placeholder="https://t.me/files"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="label">Support</label><input class="input" id="s_link_support" value="${esc(F('link_support',''))}" placeholder="https://t.me/support"></div>
+        <div class="field"><label class="label">Payment Proofs</label><input class="input" id="s_link_payment_proofs" value="${esc(F('link_payment_proofs',''))}" placeholder="https://t.me/proofs"></div>
+      </div>
+    </div>
+    <div class="glass mb-3">
+      <h3 style="font-size:14px;font-weight:900;margin-bottom:16px">💰 DEPOSITS & REFERRAL</h3>
+      <div class="field-row">
+        <div class="field"><label class="label">Min Deposit ₹</label><input class="input" id="s_min_deposit" type="number" value="${esc(F('min_deposit','10'))}"></div>
+        <div class="field"><label class="label">Max Deposit ₹</label><input class="input" id="s_max_deposit" type="number" value="${esc(F('max_deposit','50000'))}"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="label">Referral Reward (Balance ₹)</label><input class="input" id="s_referral_reward_balance" type="number" value="${esc(F('referral_reward_balance','2'))}"></div>
+        <div class="field"><label class="label">Referral Reward (Purchase ₹)</label><input class="input" id="s_referral_reward_purchase" type="number" value="${esc(F('referral_reward_purchase','2'))}"></div>
+      </div>
+    </div>
+    <div class="glass mb-3">
+      <h3 style="font-size:14px;font-weight:900;margin-bottom:16px">🎰 DAILY SPIN</h3>
+      <div class="field-row">
+        <div class="field"><label class="label">Spin Min ₹</label><input class="input" id="s_spin_min" type="number" step="0.01" value="${esc(F('spin_min','0.30'))}"></div>
+        <div class="field"><label class="label">Spin Max ₹</label><input class="input" id="s_spin_max" type="number" step="0.01" value="${esc(F('spin_max','2.00'))}"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="label">Cooldown (hours)</label><input class="input" id="s_spin_cooldown" type="number" value="${esc(F('spin_cooldown','24'))}"></div>
+        <div class="field"><label class="label">Low Stock Threshold</label><input class="input" id="s_low_stock_threshold" type="number" value="${esc(F('low_stock_threshold','5'))}"></div>
+      </div>
+    </div>
+    <div class="glass mb-3">
+      <h3 style="font-size:14px;font-weight:900;margin-bottom:16px">🏆 REFERRAL MILESTONES</h3>
+      <div class="field-row">
+        <div class="field"><label class="label">Bronze</label><input class="input" id="s_milestone_bronze" type="number" value="${esc(F('milestone_bronze','10'))}"></div>
+        <div class="field"><label class="label">Silver</label><input class="input" id="s_milestone_silver" type="number" value="${esc(F('milestone_silver','18'))}"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="label">Gold</label><input class="input" id="s_milestone_gold" type="number" value="${esc(F('milestone_gold','28'))}"></div>
+        <div class="field"><label class="label">Diamond</label><input class="input" id="s_milestone_diamond" type="number" value="${esc(F('milestone_diamond','35'))}"></div>
+      </div>
+    </div>
+    <button class="btn primary" onclick="saveSettings()">💾 SAVE ALL SETTINGS</button>`;
+}
+async function saveSettings(){
+  const keys=['store_name','store_tagline','store_announcement','link_how_to_use','link_download_files','link_support','link_payment_proofs','min_deposit','max_deposit','referral_reward_balance','referral_reward_purchase','spin_min','spin_max','spin_cooldown','low_stock_threshold','milestone_bronze','milestone_silver','milestone_gold','milestone_diamond'];
+  const body={};
+  keys.forEach(k=>{const el=$('#s_'+k);if(el) body[k]=el.value});
+  try{await api(`/api/config/${botId}`,{method:'PUT',body:JSON.stringify(body)});toast('Settings saved!')}catch(e){toast(e.message,'err')}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: PROFILE
+   ═══════════════════════════════════════════════════════════ */
+async function pgProfile(){
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">👤 ACCOUNT</div><h1>My Profile</h1><p>Your account information.</p></div>
+    <div class="glass" style="max-width:500px;padding:30px;text-align:center">
+      <div class="avatar" style="width:90px;height:90px;font-size:36px;margin:0 auto 18px">${(me?.username||'U')[0].toUpperCase()}</div>
+      <h2 style="font-size:24px;font-weight:900;margin-bottom:8px">${esc(me?.username||'User')}</h2>
+      <div class="badge">${esc(me?.role||'user').toUpperCase()}</div>
+      <div class="flex mt-2" style="justify-content:center;margin-top:20px">
+        <button class="btn danger" onclick="logout()">🚪 LOGOUT</button>
+      </div>
+    </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE: ADMIN KEYS
+   ═══════════════════════════════════════════════════════════ */
+async function pgAdminKeys(){
+  if(me?.role!=='admin'){
+    $('#view').innerHTML=`<div class="glass" style="padding:28px"><h3 style="color:var(--danger)">⛔ Admin only</h3></div>`;
+    return;
+  }
+  const d=await api('/api/admin/keys');
+  const ks=d.keys||[];
+  $('#view').innerHTML=`
+    <div class="head"><div class="kicker">🛡️ ADMIN</div><h1>Manage Keys</h1><p>Create access keys for sellers.</p></div>
+    <div class="flex between mb-2">
+      <span class="muted sm">${ks.length} key${ks.length!==1?'s':''}</span>
+      <button class="btn primary" onclick="createKeyModal()">＋ Create User Key</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Device</th><th>Last Used</th><th>Actions</th></tr></thead>
+      <tbody>${ks.length?ks.map(k=>`
+        <tr><td><b>${esc(k.username||'—')}</b></td>
+        <td><span class="pill info">${esc(k.role||'user')}</span></td>
+        <td><span class="pill ${k.active?'ok':'off'}">${k.active?'ACTIVE':'OFF'}</span></td>
+        <td>${k.device_fingerprint?'<span class="pill info">🔒 LOCKED</span>':'<span class="pill pend">UNLOCKED</span>'}</td>
+        <td class="muted sm">${fmt(k.last_used_at||k.created_at)}</td>
+        <td><button class="btn xs" onclick="toggleKeyStatus(${k.id},${k.active?0:1})">${k.active?'🚫':'✅'}</button>
+        <button class="btn xs danger" onclick="delKey(${k.id})">🗑️</button></td></tr>`).join(''):`<tr><td colspan="6" class="empty-cell">No keys</td></tr>`}</tbody>
+    </table></div>`;
+}
+function createKeyModal(){
+  showModal(`
+    <div class="modal-top"><h3>🛡️ Create User Key</h3><button class="x-btn" onclick="closeModal()">✕</button></div>
+    <div class="field"><label class="label">Username</label><input class="input" id="ckUser" placeholder="seller_name"></div>
+    <div class="field"><label class="label">Bot Quota (max bots)</label><input class="input" id="ckQuota" type="number" value="2"></div>
+    <div class="field"><label class="label">Custom Key (optional)</label><input class="input" id="ckKey" placeholder="Leave blank to auto-generate"></div>
+    <p class="muted sm">The key is device-locked to the first device that uses it.</p>
+    <div class="flex between mt-2" style="margin-top:18px">
+      <button class="btn ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn primary" onclick="createKey()">🔑 CREATE</button>
+    </div>`);
+}
+async function createKey(){
+  const username=$('#ckUser').value.trim(),key=$('#ckKey').value.trim(),quota=parseInt($('#ckQuota').value)||2;
+  if(!username&&!key) return toast('Enter username or key','err');
+  try{
+    const d=await api('/api/admin/keys',{method:'POST',body:JSON.stringify({username,key,botQuota:quota})});
+    toast('Key created!');
+    showModal(`
+      <div class="modal-top"><h3>✅ Key Created</h3><button class="x-btn" onclick="closeModal()">✕</button></div>
+      <p class="muted mb-2">Share this key. It's device-locked on first use.</p>
+      <div class="glass" style="background:rgba(0,0,0,.5);text-align:center;padding:22px">
+        <code style="font-size:15px;letter-spacing:1px">${esc(d.key)}</code>
+      </div>
+      <button class="btn primary w-full mt-2" onclick="copyTxt('${esc(d.key)}')">📋 COPY KEY</button>
+      <button class="btn w-full mt-2" onclick="closeModal();pgAdminKeys()">DONE</button>`);
+  }catch(e){toast(e.message,'err')}
+}
+async function toggleKeyStatus(id,active){
+  try{await api(`/api/admin/keys/${id}/status`,{method:'PUT',body:JSON.stringify({active})});toast('Updated');pgAdminKeys()}catch(e){toast(e.message,'err')}
+}
+async function delKey(id){
+  if(!confirm('Delete this key?')) return;
+  try{await api(`/api/admin/keys/${id}`,{method:'DELETE'});toast('Deleted');pgAdminKeys()}catch(e){toast(e.message,'err')}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════════ */
+(async function init(){
+  try{
+    const res=await fetch('/api/auth/me');
+    if(res.ok){
+      const data=await res.json();
+      if(data.ok&&data.user){
+        csrf=data.csrf||'';me=data.user;
+        showApp();await loadBots();
+        const h=location.hash.slice(1);
+        go(PAGES[h]?h:'dashboard');
+        return;
+      }
+    }
+  }catch{}
+  $('#loginScreen').style.display='flex';
+})();
+</script>
+</body>
+</html>

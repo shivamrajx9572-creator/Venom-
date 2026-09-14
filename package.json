@@ -1,0 +1,28 @@
+{
+  "name": "shivam-bot-builder",
+  "version": "3.6.0",
+  "private": true,
+  "description": "SHIVAM BOT BUILDER - Premium Telegram Bot Control Center",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "check": "node --check server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^5.1.0"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "builder",
+    "shivam",
+    "premium"
+  ],
+  "author": "SHIVAM",
+  "license": "MIT"
+}
