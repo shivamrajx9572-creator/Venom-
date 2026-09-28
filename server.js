@@ -380,7 +380,11 @@ const childGeneration = new Map();
 const restartState = new Map();
 const STARTUP_GRACE_MS = 180000;
 const HEARTBEAT_STALE_MS = 150000;
-const py = process.env.PYTHON_BIN || 'python3';
+const py = process.env.PYTHON_BIN || [
+  path.join(__dirname, '.venv', 'bin', 'python'),
+  '/vercel/share/pyenv/bin/python',
+].find(p => fs.existsSync(p)) || 'python3';
+console.log(`🐍 Python runtime: ${py}`);
 
 function startBot(id) {
   console.log(`[startBot] Starting bot ${id}`);

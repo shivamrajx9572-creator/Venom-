@@ -3,6 +3,10 @@ services:
     name: shivam-bot-builder
     runtime: docker
     healthCheckPath: /api/health
+    disk:
+      name: builder-data
+      mountPath: /app/data
+      sizeGB: 1
     envVars:
       # ─── Core Config (Auto-Set) ────────────────────────────────────────
       - key: NODE_ENV
