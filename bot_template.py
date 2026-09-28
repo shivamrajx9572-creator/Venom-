@@ -786,12 +786,14 @@ async def do_pay(update, context, plan_id, coupon_code="", discount=0):
             sent = await context.bot.send_photo(chat_id=update.effective_chat.id, photo=qr_url, caption=text, reply_markup=markup, parse_mode=ParseMode.HTML)
         except Exception as e:
             logging.exception(f"FamGateway QR URL failed, using local fallback: {e}")
-            local_qr = generate_upi_qr(fg_result.get("upi_id") or get_upi_id(), actual_amount, order_no)
-            if local_qr:
-                local_qr.seek(0)
-                try:
-                    sent = await context.bot.send_photo(chat_id=update.effective_chat.id, photo=local_qr, caption=text, reply_markup=markup, parse_mode=ParseMode.HTML)
-                except Exception: sent = None
+    if sent is None:
+        local_qr = generate_upi_qr(fg_result.get("upi_id") or get_upi_id(), actual_amount, order_no)
+        if local_qr:
+            local_qr.seek(0)
+            try:
+                sent = await context.bot.send_photo(chat_id=update.effective_chat.id, photo=local_qr, caption=text, reply_markup=markup, parse_mode=ParseMode.HTML)
+            except Exception as e:
+                logging.exception(f"Local QR send failed: {e}")
     if sent is None:
         try:
             sent = await context.bot.send_message(chat_id=update.effective_chat.id, text=text, reply_markup=markup, parse_mode=ParseMode.HTML)
@@ -1188,12 +1190,15 @@ async def handle_balance_keypad(update, context, action):
             try:
                 sent = await context.bot.send_photo(chat_id=update.effective_chat.id, photo=qr_url, caption=text, reply_markup=markup, parse_mode=ParseMode.HTML)
             except Exception:
-                local_qr = generate_upi_qr(fg_result.get("upi_id") or get_upi_id(), actual_amount, order_no)
-                if local_qr:
-                    local_qr.seek(0)
-                    try:
-                        sent = await context.bot.send_photo(chat_id=update.effective_chat.id, photo=local_qr, caption=text, reply_markup=markup, parse_mode=ParseMode.HTML)
-                    except Exception: pass
+                pass
+        if sent is None:
+            local_qr = generate_upi_qr(fg_result.get("upi_id") or get_upi_id(), actual_amount, order_no)
+            if local_qr:
+                local_qr.seek(0)
+                try:
+                    sent = await context.bot.send_photo(chat_id=update.effective_chat.id, photo=local_qr, caption=text, reply_markup=markup, parse_mode=ParseMode.HTML)
+                except Exception:
+                    pass
         if sent is None:
             try:
                 sent = await context.bot.send_message(chat_id=update.effective_chat.id, text=text, reply_markup=markup, parse_mode=ParseMode.HTML)
