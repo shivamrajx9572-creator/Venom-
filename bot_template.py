@@ -6,7 +6,7 @@ No manual UTR flow
 """
 
 from __future__ import annotations
-import asyncio, json, logging, os, re, secrets, sqlite3, threading, time
+import asyncio, base64, json, logging, os, re, secrets, sqlite3, threading, time
 import urllib.error, urllib.request, random
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
@@ -352,6 +352,71 @@ def generate_upi_qr(upi_id, amount, order_no):
         return buf
     except Exception as e:
         logging.exception(f"QR failed: {e}"); return None
+
+
+IMAGE_MAGIC = (b"\x89PNG", b"\xff\xd8\xff", b"GIF8", b"RIFF")
+
+
+def _qr_from_text(data, order_no):
+    try:
+        qr = qrcode.QRCode(version=None, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=10, border=4)
+        qr.add_data(data); qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        buf = BytesIO(); img.save(buf, format="PNG"); buf.seek(0); buf.name = f"{order_no}.png"
+        return buf
+    except Exception as e:
+        logging.exception(f"QR from text failed: {e}"); return None
+
+
+def _fetch_qr_image(qr_url, order_no):
+    """Telegram often can't load gateway QR links (data URIs, SVG, protected URLs), so fetch bytes ourselves."""
+    try:
+        if qr_url.startswith("data:image"):
+            header, _, payload = qr_url.partition(",")
+            if "svg" in header: return None
+            raw = base64.b64decode(payload) if ";base64" in header else payload.encode()
+        elif qr_url.startswith(("http://", "https://")):
+            req = urllib.request.Request(qr_url, headers={"User-Agent": "Mozilla/5.0", "Accept": "image/png,image/jpeg,image/*"})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                raw = resp.read(5 * 1024 * 1024)
+        else:
+            return None
+        if not raw.startswith(IMAGE_MAGIC): return None
+        buf = BytesIO(raw); buf.name = f"{order_no}.png"; buf.seek(0)
+        return buf
+    except Exception as e:
+        logging.warning(f"[FAMGATEWAY] QR image fetch failed: {e}"); return None
+
+
+def build_payment_qr(fg_result, amount, order_no):
+    upi_intent = str(fg_result.get("upi_intent") or "").strip()
+    if upi_intent.lower().startswith("upi://"):
+        qr = _qr_from_text(upi_intent, order_no)
+        if qr: return qr
+    qr_url = str(fg_result.get("qr_url") or "").strip()
+    if qr_url:
+        qr = _fetch_qr_image(qr_url, order_no)
+        if qr: return qr
+    return generate_upi_qr(fg_result.get("upi_id") or get_upi_id(), amount, order_no)
+
+
+async def send_payment_screen(context, chat_id, text, markup, fg_result, amount, order_no):
+    qr = await asyncio.to_thread(build_payment_qr, fg_result, amount, order_no)
+    if qr:
+        try:
+            return await context.bot.send_photo(chat_id=chat_id, photo=qr, caption=text, reply_markup=markup, parse_mode=ParseMode.HTML)
+        except Exception as e:
+            logging.exception(f"QR photo send failed: {e}")
+    qr_url = str(fg_result.get("qr_url") or "")
+    if qr_url.startswith(("http://", "https://")):
+        try:
+            return await context.bot.send_photo(chat_id=chat_id, photo=qr_url, caption=text, reply_markup=markup, parse_mode=ParseMode.HTML)
+        except Exception as e:
+            logging.warning(f"QR URL send failed: {e}")
+    try:
+        return await context.bot.send_message(chat_id=chat_id, text=text, reply_markup=markup, parse_mode=ParseMode.HTML)
+    except Exception as e:
+        logging.exception(f"Payment msg send failed: {e}"); return None
 
 
 async def fg_create_order(amount: float, customer_name: str = ""):
@@ -780,22 +845,7 @@ async def do_pay(update, context, plan_id, coupon_code="", discount=0):
 
     await clear_all_screens(context, context.bot)
 
-    sent = None
-    if qr_url:
-        try:
-            sent = await context.bot.send_photo(chat_id=update.effective_chat.id, photo=qr_url, caption=text, reply_markup=markup, parse_mode=ParseMode.HTML)
-        except Exception as e:
-            logging.exception(f"FamGateway QR URL failed, using local fallback: {e}")
-            local_qr = generate_upi_qr(fg_result.get("upi_id") or get_upi_id(), actual_amount, order_no)
-            if local_qr:
-                local_qr.seek(0)
-                try:
-                    sent = await context.bot.send_photo(chat_id=update.effective_chat.id, photo=local_qr, caption=text, reply_markup=markup, parse_mode=ParseMode.HTML)
-                except Exception: sent = None
-    if sent is None:
-        try:
-            sent = await context.bot.send_message(chat_id=update.effective_chat.id, text=text, reply_markup=markup, parse_mode=ParseMode.HTML)
-        except Exception as e: logging.exception(f"Payment msg send failed: {e}")
+    sent = await send_payment_screen(context, update.effective_chat.id, text, markup, fg_result, actual_amount, order_no)
     if sent:
         track_msg(context, sent.chat_id, sent.message_id)
         with db() as conn:
@@ -1183,21 +1233,7 @@ async def handle_balance_keypad(update, context, action):
         markup = InlineKeyboardMarkup(kb_rows)
 
         await clear_all_screens(context, context.bot)
-        sent = None
-        if qr_url:
-            try:
-                sent = await context.bot.send_photo(chat_id=update.effective_chat.id, photo=qr_url, caption=text, reply_markup=markup, parse_mode=ParseMode.HTML)
-            except Exception:
-                local_qr = generate_upi_qr(fg_result.get("upi_id") or get_upi_id(), actual_amount, order_no)
-                if local_qr:
-                    local_qr.seek(0)
-                    try:
-                        sent = await context.bot.send_photo(chat_id=update.effective_chat.id, photo=local_qr, caption=text, reply_markup=markup, parse_mode=ParseMode.HTML)
-                    except Exception: pass
-        if sent is None:
-            try:
-                sent = await context.bot.send_message(chat_id=update.effective_chat.id, text=text, reply_markup=markup, parse_mode=ParseMode.HTML)
-            except Exception: pass
+        sent = await send_payment_screen(context, update.effective_chat.id, text, markup, fg_result, actual_amount, order_no)
         if sent:
             track_msg(context, sent.chat_id, sent.message_id)
             with db() as conn:
