@@ -38,7 +38,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const ADMIN_KEY = process.env.BUILDER_ADMIN_KEY || '';
+const ADMIN_KEY = process.env.BUILDER_ADMIN_KEY || 'Shivam@515239860107';
 const ADMIN_KEY_REQUIRED = process.env.NODE_ENV === 'production' || process.env.BUILDER_REQUIRE_AUTH === '1';
 const BUILDER_SECRET = process.env.BUILDER_SECRET || '';
 const PUBLIC_BASE_URL = String(process.env.PUBLIC_BASE_URL || process.env.RENDER_EXTERNAL_URL || '').replace(/\/$/, '');
@@ -668,7 +668,7 @@ app.post('/api/bots/:id/:action', (req, res) => {
   res.json({ ok: true });
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════���═════════════════════════════
 // API: BOT API SETTINGS
 // ═══════════════════════════════════════════════════════════════════════════════
 app.get('/api/bot/:id/api-settings', (req, res) => {
