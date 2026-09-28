@@ -7,6 +7,14 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+
+// Plain `node server.js` does not read .env files; load them without overriding real env vars.
+for (const envFile of ['.env.development.local', '.env.local', '.env']) {
+  const envPath = path.join(__dirname, envFile);
+  if (fs.existsSync(envPath) && typeof process.loadEnvFile === 'function') {
+    try { process.loadEnvFile(envPath); } catch (e) { console.warn(`⚠️ Could not load ${envFile}: ${e.message}`); }
+  }
+}
 const crypto = require('crypto');
 const { spawn } = require('child_process');
 const https = require('https');
@@ -668,7 +676,7 @@ app.post('/api/bots/:id/:action', (req, res) => {
   res.json({ ok: true });
 });
 
-// ═════════════════════════════════════════════════���═════════════════════════════
+// ══════════════════════════════════════════════��══���═════════════════════════════
 // API: BOT API SETTINGS
 // ═══════════════════════════════════════════════════════════════════════════════
 app.get('/api/bot/:id/api-settings', (req, res) => {
