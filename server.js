@@ -372,7 +372,7 @@ function accessibleBot(req, id) {
   return b.seller_id && Number(b.seller_id) === Number(req.user.id) ? b : null;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════���═════════
 // BOT LIFECYCLE
 // ═══════════════════════════════════════════════════════════════════════════════
 const children = new Map();
@@ -481,6 +481,47 @@ function stopBot(id) {
   return true;
 }
 function restartBot(id) { stopBot(id); return startBot(id); }
+
+function explainBotError(raw) {
+  const s = String(raw || '');
+  if (/No module named/i.test(s)) return 'Server par Python packages install nahi hain (requirements.txt). Server redeploy karein.';
+  if (/Conflict|terminated by other getUpdates/i.test(s)) return 'Yeh bot token kisi aur jagah bhi chal raha hai. Doosri jagah band karein ya BotFather se token revoke karke naya token daalein.';
+  if (/InvalidToken|Unauthorized|rejected by the server/i.test(s)) return 'Bot token galat hai ya revoke ho chuka hai. BotFather se naya token lein.';
+  if (/ENOENT|spawn/i.test(s)) return 'Server par Python nahi mila. PYTHON_BIN set karein ya Docker se deploy karein.';
+  const lastLine = s.trim().split('\n').filter(Boolean).pop() || 'Bot start hote hi band ho gaya';
+  return `Bot start nahi hua: ${lastLine.slice(0, 300)}`;
+}
+
+async function waitForBotHealthy(id, timeoutMs = 20000) {
+  const bot = getBot(id);
+  if (!bot) return { ok: false, message: 'Bot not found' };
+  const dir = path.dirname(bot.db_path);
+  const pollingMarker = path.join(dir, 'bot.log');
+  const deadline = Date.now() + timeoutMs;
+  let errorBuf = '';
+  const child = children.get(id);
+  const onErr = (d) => { errorBuf += d.toString(); };
+  child?.stderr?.on('data', onErr);
+  try {
+    while (Date.now() < deadline) {
+      await new Promise(r => setTimeout(r, 1000));
+      const c = children.get(id);
+      if (!c || c.exitCode !== null) {
+        const row = builderDb.prepare('SELECT last_error FROM bots WHERE id=?').get(id);
+        let log = '';
+        try { log = fs.readFileSync(pollingMarker, 'utf8').slice(-3000); } catch {}
+        return { ok: false, message: explainBotError(errorBuf || log || row?.last_error) };
+      }
+      let log = '';
+      try { log = fs.readFileSync(pollingMarker, 'utf8'); } catch {}
+      if (/Conflict|terminated by other getUpdates/i.test(log)) return { ok: false, message: explainBotError(log) };
+      if (/Application started|Bot polling/i.test(log) && Date.now() > deadline - timeoutMs + 6000) return { ok: true };
+    }
+    return { ok: true };
+  } finally {
+    child?.stderr?.off('data', onErr);
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MIDDLEWARE
@@ -637,7 +678,16 @@ app.post('/api/bots/deploy', async (req, res) => {
   try {
     const x = await tg(token, 'getMe');
     if (!x.ok) return res.status(400).json({ ok: false, message: x.description || 'Token invalid' });
-    if (builderDb.prepare('SELECT id FROM bots WHERE username=?').get(x.result.username)) return res.status(409).json({ ok: false, message: 'Already deployed' });
+    const existingBot = builderDb.prepare('SELECT * FROM bots WHERE username=?').get(x.result.username);
+    if (existingBot) {
+      if (!isAdmin(req) && existingBot.seller_id !== req.user.id) return res.status(409).json({ ok: false, message: 'This bot is already deployed by another account' });
+      builderDb.prepare('UPDATE bots SET token_enc=?, owner_id=? WHERE id=?').run(encrypt(token), String(ownerId), existingBot.id);
+      stopBot(existingBot.id);
+      startBot(existingBot.id);
+      const check = await waitForBotHealthy(existingBot.id);
+      if (!check.ok) return res.status(502).json({ ok: false, message: check.message });
+      return res.json({ ok: true, restarted: true, bot: { id: existingBot.id, username: x.result.username, name: existingBot.name, owner_id: String(ownerId), status: 'online' } });
+    }
 
     const callbackSecret = crypto.randomBytes(24).toString('hex');
     const sellerId = isAdmin(req) ? (req.body?.seller_id || req.user.id) : req.user.id;
@@ -652,7 +702,13 @@ app.post('/api/bots/deploy', async (req, res) => {
     if (!isAdmin(req)) builderDb.prepare('UPDATE sellers SET bot_used = bot_used + 1 WHERE id=?').run(sellerId);
 
     const started = startBot(id);
-    if (!started) { builderDb.prepare('DELETE FROM bots WHERE id=?').run(id); return res.status(503).json({ ok: false, message: 'Bot failed to start' }); }
+    const check = started ? await waitForBotHealthy(id) : { ok: false, message: 'Bot failed to start' };
+    if (!check.ok) {
+      stopBot(id);
+      builderDb.prepare('DELETE FROM bots WHERE id=?').run(id);
+      if (!isAdmin(req)) builderDb.prepare('UPDATE sellers SET bot_used = MAX(bot_used - 1, 0) WHERE id=?').run(sellerId);
+      return res.status(502).json({ ok: false, message: check.message });
+    }
 
     const bot = getBot(id);
     res.json({ ok: true, bot: { id, username: x.result.username, name: bot.name, owner_id: bot.owner_id, status: 'online' } });
@@ -1055,7 +1111,7 @@ app.post('/api/resellers/:id', (req, res) => {
   } catch (e) { res.status(400).json({ ok: false, message: e.message }); }
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════���═════════════════════════════════════════════
 // API: TOP-UPS (balance orders only)
 // ═══════════════════════════════════════════════════════════════════════════════
 app.get('/api/payments/:id', (req, res) => {

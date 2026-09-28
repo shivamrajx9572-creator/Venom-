@@ -2,6 +2,9 @@ services:
   - type: web
     name: shivam-bot-builder
     runtime: docker
+    # Free plan sleeps after 15 min idle and cannot attach a disk, which kills
+    # every bot and wipes the database. Starter keeps bots online 24/7.
+    plan: starter
     healthCheckPath: /api/health
     disk:
       name: builder-data
